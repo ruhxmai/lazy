@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dev Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0c0c;--s1:#141414;--s2:#1a1a1a;--s3:#202020;
+  --b:#262626;--b2:#333;
+  --text:#e8e4dc;--muted:#4a4a4a;--muted2:#777;
+  --accent:#c8f53a;--ad:#151d00;
+  --know:#2ecc71;--kd:#001a0a;
+  --skip:#e74c3c;--sd:#1a0500;
+  --gold:#e8b84b;--blue:#4a9eff;
+  --mono:'DM Mono',monospace;--sans:'Syne',sans-serif;
+  --r:10px;--r2:14px;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+header{padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--b);position:sticky;top:0;z-index:50;background:rgba(12,12,12,.95);backdrop-filter:blur(16px)}
+.logo{font-size:.82rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+.header-right{display:flex;align-items:center;gap:1.25rem}
+.xp-wrap{display:flex;align-items:center;gap:8px}
+.lv-badge{font-family:var(--mono);font-size:.65rem;background:var(--ad);color:var(--accent);border:1px solid rgba(200,245,58,.3);border-radius:2px;padding:3px 9px;letter-spacing:.06em}
+.xp-track{width:72px;height:2px;background:var(--b2);border-radius:999px;overflow:hidden}
+.xp-fill{height:100%;background:var(--accent);border-radius:999px;transition:width .5s}
+.streak-num{font-family:var(--mono);font-size:.7rem;color:var(--muted2)}
+.streak-num b{color:var(--text)}
+nav{display:flex;border-bottom:1px solid var(--b);padding:0 2rem;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted2);font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:.85rem 1.25rem .75rem;cursor:pointer;transition:color .15s,border-color .15s;white-space:nowrap;flex-shrink:0}
+nav button.active{color:var(--text);border-bottom-color:var(--accent)}
+nav button:hover:not(.active){color:var(--text)}
+.page{display:none;flex:1}
+.page.active{display:flex;flex-direction:column}
+#study-page{align-items:center;padding:2rem 1.5rem;gap:1.25rem}
+.mode-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.mode-btn{background:transparent;border:1px solid var(--b);border-radius:2px;color:var(--muted2);font-family:var(--mono);font-size:.65rem;letter-spacing:.05em;padding:4px 12px;cursor:pointer;transition:all .15s}
+.mode-btn.active{background:var(--ad);border-color:rgba(200,245,58,.4);color:var(--accent)}
+.mode-btn:hover:not(.active){border-color:var(--b2);color:var(--text)}
+.m-lives{display:none;gap:4px;align-items:center}
+.m-lives.show{display:flex}
+.life-dot{width:7px;height:7px;border-radius:50%;background:var(--know);transition:opacity .3s}
+.life-dot.lost{opacity:.15;background:var(--muted)}
+.srs-label{display:none;font-family:var(--mono);font-size:.62rem;color:var(--muted2);letter-spacing:.06em;text-transform:uppercase}
+.srs-label.show{display:block}
+.card-wrap{width:100%;max-width:560px;perspective:1600px}
+.card{width:100%;min-height:280px;position:relative;transform-style:preserve-3d;transition:transform .48s cubic-bezier(.4,0,.2,1);cursor:pointer}
+.card.flipped{transform:rotateY(180deg)}
+@keyframes shake{0%,100%{transform:rotateY(180deg)}20%{transform:rotateY(180deg) translateX(-7px) rotate(-1deg)}40%{transform:rotateY(180deg) translateX(6px) rotate(.8deg)}60%{transform:rotateY(180deg) translateX(-4px)}80%{transform:rotateY(180deg) translateX(3px)}}
+.card.shake{animation:shake .4s ease}
+.card-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--r2);padding:1.75rem 2rem;display:flex;flex-direction:column;min-height:280px;transition:border-color .25s,box-shadow .25s}
+.card-front{background:var(--s1);border:1px solid var(--b)}
+.card-back{background:var(--s2);border:1px solid var(--b2);transform:rotateY(180deg)}
+.card-back.flash-ok{border-color:rgba(46,204,113,.5);box-shadow:0 0 24px rgba(46,204,113,.1)}
+.card-back.flash-err{border-color:rgba(231,76,60,.5);box-shadow:0 0 24px rgba(231,76,60,.12)}
+.card-meta{font-family:var(--mono);font-size:.62rem;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.1rem;display:flex;align-items:center;gap:8px}
+.srs-chip{margin-left:auto;background:var(--s3);border:1px solid var(--b2);border-radius:2px;padding:1px 6px;font-size:.58rem;color:var(--muted2)}
+.card-q{font-size:1.1rem;font-weight:600;line-height:1.55;flex:1}
+.card-hint{margin-top:auto;padding-top:1rem;font-family:var(--mono);font-size:.62rem;color:var(--muted)}
+.card-ans{font-size:.87rem;line-height:1.75;color:#aaa;flex:1;overflow-y:auto}
+.card-ans strong{color:var(--text)}.card-ans em{color:var(--muted2);font-style:italic}
+.card-ans code{font-family:var(--mono);background:#0a0a0a;border:1px solid var(--b);border-radius:3px;padding:1px 5px;font-size:.79em;color:var(--accent)}
+.card-ans pre{background:#0a0a0a;border:1px solid var(--b);border-radius:8px;padding:.85rem;overflow-x:auto;margin:.55rem 0;font-family:var(--mono);font-size:.76rem;color:#9fd56b;line-height:1.55}
+.card-ans pre code{background:none;border:none;padding:0;color:#9fd56b}
+.card-ans ul,.card-ans ol{padding-left:1.15rem;margin:.35rem 0}.card-ans li{margin:.2rem 0}
+.card-ans p{margin:.35rem 0}.card-ans blockquote{border-left:2px solid var(--b2);padding-left:.6rem;color:var(--muted2);margin:.4rem 0}
+.card-ans h1,.card-ans h2,.card-ans h3{display:none}
+.card-source{margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--b);font-family:var(--mono);font-size:.6rem;color:var(--muted2)}
+.card-source a{color:var(--accent);text-decoration:none;cursor:pointer}.card-source a:hover{text-decoration:underline}
+.prog-row{display:flex;align-items:center;gap:10px;width:100%;max-width:560px}
+.prog-wrap{flex:1;height:1px;background:var(--b);overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);transition:width .3s}
+.prog-txt{font-family:var(--mono);font-size:.65rem;color:var(--muted2);white-space:nowrap}
+.actions{display:flex;gap:8px;width:100%;max-width:560px}
+.btn-skip,.btn-know,.btn-flip{flex:1;border:none;border-radius:var(--r);font-family:var(--mono);font-size:.78rem;font-weight:500;letter-spacing:.04em;padding:11px;cursor:pointer;transition:transform .1s,box-shadow .2s}
+.btn-skip:active,.btn-know:active,.btn-flip:active{transform:scale(.97)}
+.btn-know{background:var(--kd);color:var(--know);border:1px solid rgba(46,204,113,.3)}
+.btn-skip{background:var(--sd);color:var(--skip);border:1px solid rgba(231,76,60,.3)}
+.btn-flip{background:var(--s2);color:var(--muted2);border:1px solid var(--b);flex:.5}
+.btn-know:hover{box-shadow:0 0 16px rgba(46,204,113,.15)}.btn-skip:hover{box-shadow:0 0 16px rgba(231,76,60,.15)}
+.xp-pop{position:fixed;top:4.5rem;right:1.5rem;background:var(--ad);border:1px solid rgba(200,245,58,.25);border-radius:2px;padding:.45rem .85rem;font-family:var(--mono);font-size:.68rem;color:var(--accent);opacity:0;transform:translateY(-6px);transition:opacity .18s,transform .18s;pointer-events:none;z-index:200}
+.xp-pop.show{opacity:1;transform:translateY(0)}
+.lu-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:300;opacity:0;pointer-events:none;transition:opacity .25s}
+.lu-overlay.show{opacity:1;pointer-events:auto}
+.lu-box{background:var(--s2);border:1px solid rgba(200,245,58,.3);border-radius:var(--r2);padding:2.5rem 3.5rem;text-align:center;transform:scale(.92);transition:transform .25s}
+.lu-overlay.show .lu-box{transform:scale(1)}
+.lu-tag{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:.5rem}
+.lu-lv{font-size:2.25rem;font-weight:800;color:var(--accent);margin:.2rem 0}
+.lu-name{font-size:.95rem;color:var(--muted2)}
+#boss-page{align-items:center;padding:2rem 1.5rem;gap:1.25rem}
+.boss-bar{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:560px;padding:.7rem 1rem;background:var(--s1);border:1px solid var(--b);border-radius:var(--r);font-family:var(--mono);font-size:.75rem}
+.boss-timer{color:var(--gold);font-size:1rem;font-weight:500}
+.boss-score-txt{color:var(--muted2)}
+.boss-result{display:flex;flex-direction:column;align-items:center;padding:3rem 2rem;gap:1.25rem;text-align:center;width:100%}
+.boss-grade{font-size:4.5rem;font-weight:800;color:var(--gold);line-height:1}
+.boss-sub{font-size:.82rem;color:var(--muted2);line-height:1.7;max-width:360px}
+.btn-boss-start{background:var(--gold);border:none;border-radius:var(--r);color:#0c0c0c;font-family:var(--sans);font-size:.85rem;font-weight:700;letter-spacing:.04em;padding:11px 28px;cursor:pointer;transition:opacity .15s}
+.btn-boss-start:hover{opacity:.85}
+.btn-boss-again{background:transparent;border:1px solid var(--b2);border-radius:var(--r);color:var(--muted2);font-family:var(--mono);font-size:.75rem;padding:9px 20px;cursor:pointer;transition:border-color .15s,color .15s}
+.btn-boss-again:hover{border-color:var(--accent);color:var(--accent)}
+#wiki-page{flex-direction:row}
+.wiki-sidebar{width:210px;flex-shrink:0;border-right:1px solid var(--b);padding:1.25rem .85rem;display:flex;flex-direction:column;gap:3px;overflow-y:auto;max-height:calc(100vh - 6rem)}
+.wiki-sidebar-title{font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);padding:.2rem .5rem;margin-bottom:.5rem}
+.wiki-nav-btn{background:none;border:none;border-radius:6px;color:var(--muted2);font-family:var(--sans);font-size:.78rem;padding:.45rem .75rem;cursor:pointer;text-align:left;width:100%;transition:background .15s,color .15s}
+.wiki-nav-btn:hover{background:var(--s2);color:var(--text)}
+.wiki-nav-btn.active{background:var(--ad);color:var(--accent)}
+.wiki-nav-cat{font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:.4rem .75rem .1rem;margin-top:.35rem}
+.wiki-content{flex:1;overflow-y:auto;padding:2rem 2.5rem;max-width:760px}
+.wiki-empty{padding:3rem;text-align:center;color:var(--muted2)}
+.wiki-empty p{font-size:.82rem;margin-top:.4rem}
+.wiki-article h1{font-size:1.5rem;font-weight:700;margin-bottom:.2rem}
+.wiki-article .wiki-cat{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem;display:block}
+.wiki-article h2{font-size:.98rem;font-weight:600;margin:1.75rem 0 .6rem;padding-bottom:.4rem;border-bottom:1px solid var(--b)}
+.wiki-article h3{font-size:.88rem;font-weight:600;margin:1.1rem 0 .35rem;color:var(--muted2)}
+.wiki-article p{font-size:.87rem;line-height:1.8;color:#999;margin:.55rem 0}
+.wiki-article strong{color:var(--text);font-weight:600}.wiki-article em{color:var(--muted2);font-style:italic}
+.wiki-article code{font-family:var(--mono);background:#0a0a0a;border:1px solid var(--b);border-radius:3px;padding:1px 6px;font-size:.78em;color:var(--accent)}
+.wiki-article pre{background:#0a0a0a;border:1px solid var(--b);border-radius:8px;padding:1rem;overflow-x:auto;margin:.75rem 0;font-family:var(--mono);font-size:.77rem;color:#9fd56b;line-height:1.6}
+.wiki-article pre code{background:none;border:none;padding:0;color:#9fd56b}
+.wiki-article ul,.wiki-article ol{padding-left:1.25rem;margin:.5rem 0}
+.wiki-article li{font-size:.87rem;line-height:1.75;color:#999;margin:.2rem 0}
+.wiki-article blockquote{border-left:2px solid var(--accent);padding-left:.75rem;margin:.75rem 0;color:var(--muted2);font-size:.87rem}
+.wiki-article table{width:100%;border-collapse:collapse;margin:.75rem 0;font-size:.8rem}
+.wiki-article th{background:var(--s2);border:1px solid var(--b);padding:.45rem .7rem;text-align:left;font-family:var(--mono);font-size:.67rem;letter-spacing:.05em;color:var(--muted2)}
+.wiki-article td{border:1px solid var(--b);padding:.45rem .7rem;color:#999}
+.wiki-article .mermaid{background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:1.25rem;margin:.75rem 0;overflow-x:auto;text-align:center}
+.wiki-actions{display:flex;align-items:center;gap:10px;margin-top:2rem;padding-top:1.25rem;border-top:1px solid var(--b)}
+.btn-gen{background:var(--accent);border:none;border-radius:var(--r);color:#0c0c0c;font-family:var(--sans);font-size:.75rem;font-weight:700;letter-spacing:.04em;padding:8px 18px;cursor:pointer;transition:opacity .15s}
+.btn-gen:hover{opacity:.85}.btn-gen:disabled{opacity:.35;cursor:not-allowed}
+.gen-status{font-family:var(--mono);font-size:.7rem;color:var(--muted2)}
+.gen-status.ok{color:var(--know)}.gen-status.err{color:var(--skip)}
+#stats-page{padding:2rem;max-width:700px;margin:0 auto;width:100%;flex-direction:column;gap:1.75rem}
+.sec-title{font-family:var(--mono);font-size:.58rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:.75rem}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.stat-card{background:var(--s1);border:1px solid var(--b);border-radius:var(--r);padding:1rem 1.1rem}
+.stat-lbl{font-family:var(--mono);font-size:.6rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.stat-val{font-size:1.55rem;font-weight:700}
+.heatmap-wrap{overflow-x:auto}
+.heatmap{display:flex;gap:3px}
+.hm-col{display:flex;flex-direction:column;gap:3px}
+.hm-cell{width:11px;height:11px;border-radius:2px;background:var(--b);flex-shrink:0}
+.hm-cell[data-v="1"]{background:#1a2800}.hm-cell[data-v="2"]{background:#324d00}
+.hm-cell[data-v="3"]{background:#5c8c00}.hm-cell[data-v="4"]{background:var(--accent)}
+.cat-list{display:flex;flex-direction:column;gap:8px}
+.cat-row{display:flex;align-items:center;gap:10px}
+.cat-name{font-family:var(--mono);font-size:.68rem;color:var(--muted2);width:88px;flex-shrink:0}
+.cat-bar-wrap{flex:1;height:4px;background:var(--b);border-radius:999px;overflow:hidden}
+.cat-bar{height:100%;background:var(--accent);border-radius:999px;transition:width .5s}
+.cat-pct{font-family:var(--mono);font-size:.65rem;color:var(--muted2);width:30px;text-align:right}
+.srs-upcoming{display:flex;flex-direction:column;gap:6px}
+.srs-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem .85rem;background:var(--s1);border:1px solid var(--b);border-radius:8px}
+.srs-q{font-size:.77rem}.srs-date{font-family:var(--mono);font-size:.65rem;color:var(--accent)}
+.btn-reset{background:none;border:1px solid var(--b);border-radius:var(--r);color:var(--muted2);font-family:var(--mono);font-size:.67rem;padding:6px 14px;cursor:pointer;transition:border-color .15s,color .15s;align-self:flex-start}
+.btn-reset:hover{border-color:var(--skip);color:var(--skip)}
+#help-page{padding:2rem;max-width:640px;margin:0 auto;width:100%;flex-direction:column;gap:1rem}
+.help-s{background:var(--s1);border:1px solid var(--b);border-radius:var(--r);padding:1.35rem}
+.help-s h3{font-size:.82rem;font-weight:700;letter-spacing:.02em;margin-bottom:.9rem}
+.help-s p,.help-s li{font-size:.8rem;line-height:1.75;color:var(--muted2);margin:.3rem 0}
+.help-s ul{padding-left:1.15rem}
+.help-s code{font-family:var(--mono);background:#0a0a0a;border:1px solid var(--b);border-radius:3px;padding:1px 5px;font-size:.77em;color:var(--accent)}
+.help-s pre{background:#0a0a0a;border:1px solid var(--b);border-radius:8px;padding:.85rem;overflow-x:auto;margin:.6rem 0;font-family:var(--mono);font-size:.72rem;color:#9fd56b;line-height:1.55}
+.cfg-row{display:flex;gap:8px;margin-top:.5rem}
+.cfg-row input{flex:1;background:var(--s2);border:1px solid var(--b);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:.75rem;padding:7px 10px;outline:none;transition:border-color .15s}
+.cfg-row input:focus{border-color:rgba(200,245,58,.4)}
+.cfg-row button{background:var(--accent);border:none;border-radius:var(--r);color:#0c0c0c;font-family:var(--sans);font-size:.75rem;font-weight:700;padding:7px 14px;cursor:pointer}
+#confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:999}
+.toast{position:fixed;bottom:1.75rem;left:50%;transform:translateX(-50%) translateY(14px);background:var(--s2);border:1px solid var(--b2);color:var(--text);font-family:var(--mono);font-size:.72rem;padding:6px 15px;border-radius:2px;opacity:0;transition:opacity .18s,transform .18s;pointer-events:none;z-index:1000;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:640px){
+  header{padding:.85rem 1rem} nav{padding:0 .5rem} nav button{padding:.8rem .85rem;font-size:.65rem}
+  #study-page{padding:1.25rem 1rem} .card-face{padding:1.35rem 1.5rem} .card-q{font-size:1rem}
+  #wiki-page{flex-direction:column} .wiki-sidebar{width:100%;max-height:none;border-right:none;border-bottom:1px solid var(--b);flex-direction:row;flex-wrap:wrap;padding:.85rem;gap:5px}
+  .wiki-sidebar-title,.wiki-nav-cat{display:none} .wiki-content{padding:1.25rem}
+  #stats-page,#help-page{padding:1rem}
+}
+</style>
+</head>
+<body>
+<canvas id="confetti-canvas"></canvas>
+<div class="lu-overlay" id="lu-overlay" onclick="this.classList.remove('show')">
+  <div class="lu-box"><div class="lu-tag">Level up</div><div class="lu-lv" id="lu-lv"></div><div class="lu-name" id="lu-name"></div></div>
+</div>
+<div class="xp-pop" id="xp-pop"></div>
+<header>
+  <div class="logo">Dev Cards</div>
+  <div class="header-right">
+    <div class="xp-wrap">
+      <div class="lv-badge" id="lv-badge">LV 1</div>
+      <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+    </div>
+    <div class="streak-num">Streak <b id="streak-val">0</b></div>
+  </div>
+</header>
+<nav>
+  <button class="active" onclick="showPage('study')">Study</button>
+  <button onclick="showPage('boss')">Boss</button>
+  <button onclick="showPage('wiki')">Wiki</button>
+  <button onclick="showPage('stats')">Progress</button>
+  <button onclick="showPage('help')">Setup</button>
+</nav>
+
+<div id="study-page" class="page active">
+  <div class="mode-row" id="mode-row"></div>
+  <div class="m-lives" id="m-lives"><div class="life-dot" id="ld1"></div><div class="life-dot" id="ld2"></div><div class="life-dot" id="ld3"></div></div>
+  <div class="srs-label" id="srs-label">Spaced Repetition active</div>
+  <div class="card-wrap">
+    <div class="card" id="card" onclick="flipCard()">
+      <div class="card-face card-front">
+        <div class="card-meta"><span id="card-cat"></span><span class="srs-chip" id="srs-chip" style="display:none"></span></div>
+        <div class="card-q" id="card-q">Loading...</div>
+        <div class="card-hint">click to reveal answer</div>
+      </div>
+      <div class="card-face card-back" id="card-back">
+        <div class="card-meta"><span id="card-cat2"></span></div>
+        <div class="card-ans" id="card-ans"></div>
+        <div class="card-source" id="card-source" style="display:none">From wiki: <a onclick="openWikiSource()" id="card-source-link"></a></div>
+      </div>
+    </div>
+  </div>
+  <div class="prog-row"><div class="prog-wrap"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div><div class="prog-txt" id="prog-txt">0 / 0</div></div>
+  <div class="actions">
+    <button class="btn-skip" onclick="answer(false)">incorrect</button>
+    <button class="btn-flip" onclick="flipCard()">flip</button>
+    <button class="btn-know" onclick="answer(true)">correct</button>
+  </div>
+</div>
+
+<div id="boss-page" class="page">
+  <div id="boss-quiz" style="display:flex;flex-direction:column;align-items:center;padding:2rem 1.5rem;gap:1.25rem;width:100%">
+    <div class="boss-bar"><div class="boss-timer" id="boss-timer">60s</div><div class="boss-score-txt">correct <b id="bc">0</b> / wrong <b id="bw">0</b> / 10</div></div>
+    <div class="card-wrap">
+      <div class="card" id="boss-card" onclick="bossFlip()">
+        <div class="card-face card-front"><div class="card-meta"><span id="boss-cat"></span></div><div class="card-q" id="boss-q">Press Start to begin Boss Mode</div><div class="card-hint">click to flip</div></div>
+        <div class="card-face card-back"><div class="card-meta"><span id="boss-cat2"></span></div><div class="card-ans" id="boss-ans"></div></div>
+      </div>
+    </div>
+    <div class="prog-row" style="max-width:560px;width:100%"><div class="prog-wrap"><div class="prog-fill" id="boss-prog" style="width:0%;background:var(--gold)"></div></div><div class="prog-txt" id="boss-prog-txt">0 / 10</div></div>
+    <div class="actions" style="max-width:560px;width:100%">
+      <button class="btn-skip" id="bskip" onclick="bossAns(false)" disabled>incorrect</button>
+      <button class="btn-flip" onclick="bossFlip()">flip</button>
+      <button class="btn-know" id="bknow" onclick="bossAns(true)" disabled>correct</button>
+    </div>
+    <button class="btn-boss-start" id="boss-start" onclick="startBoss()">Start Boss Mode</button>
+  </div>
+  <div class="boss-result" id="boss-result" style="display:none">
+    <div style="font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2)">Boss Mode complete</div>
+    <div class="boss-grade" id="boss-grade"></div>
+    <div class="boss-sub" id="boss-sub"></div>
+    <button class="btn-boss-again" onclick="resetBoss()">Try again</button>
+  </div>
+</div>
+
+<div id="wiki-page" class="page">
+  <div class="wiki-sidebar" id="wiki-sidebar"><div class="wiki-sidebar-title">Wiki</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted2)">Loading...</div></div>
+  <div class="wiki-content" id="wiki-content"><div class="wiki-empty"><div style="font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2)">Select an article</div><p>Choose a topic from the sidebar.</p></div></div>
+</div>
+
+<div id="stats-page" class="page">
+  <div style="padding:2rem;max-width:700px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:1.75rem">
+    <div><div class="sec-title">Overview</div><div class="stats-grid" id="stats-grid"></div></div>
+    <div><div class="sec-title">Activity — 26 weeks</div><div class="heatmap-wrap"><div class="heatmap" id="heatmap"></div></div></div>
+    <div><div class="sec-title">By category</div><div class="cat-list" id="cat-list"></div></div>
+    <div><div class="sec-title">Upcoming reviews</div><div class="srs-upcoming" id="srs-upcoming"></div></div>
+    <button class="btn-reset" onclick="resetAll()">Reset progress</button>
+  </div>
+</div>
+
+<div id="help-page" class="page">
+  <div class="help-s"><h3>GitHub repository</h3><div class="cfg-row"><input type="text" id="repo-input" placeholder="username/repo-name"><button onclick="saveRepo()">Save</button></div><p style="margin-top:.5rem">Current: <code id="current-repo">—</code></p></div>
+  <div class="help-s"><h3>Repository structure</h3><pre>my-repo/
+├── cards/
+│   ├── index.json
+│   └── js-closure.md
+├── wiki/
+│   ├── index.json
+│   └── js-closures.md
+└── index.html</pre></div>
+  <div class="help-s"><h3>Wiki article template</h3><pre>---
+title: Article Title
+category: Frontend
+---
+
+# Title
+
+Content here.
+
+## Section
+
+```mermaid
+graph TD
+  A --> B --> C
+```
+
+## Cards
+
+- Question one?
+- Question two?</pre><p>The <code>## Cards</code> section lists questions AI will convert to flashcards.</p></div>
+  <div class="help-s"><h3>Study modes</h3><ul><li><strong>All / Category / Daily</strong> — standard, weak cards first</li><li><strong>SRS</strong> — correct: +1→3→7→14→30 days interval</li><li><strong>Marathon</strong> — 3 lives, complete deck without 3 errors</li><li><strong>Boss</strong> — 10 questions, 60s timer, S–D grade</li><li><strong>Wiki</strong> — read theory, generate cards with AI</li></ul></div>
+  <div class="help-s"><h3>Keyboard</h3><ul><li><code>Space / Up</code> — flip card</li><li><code>Right</code> — correct &nbsp; <code>Left</code> — incorrect</li></ul></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+mermaid.initialize({startOnLoad:false,theme:'dark',themeVariables:{background:'#0a0a0a',primaryColor:'#1a2800',primaryTextColor:'#c8f53a',lineColor:'#333'}});
+const BRANCH='main';
+const SRS=[1,3,7,14,30];
+const LEVELS=[{xp:0,name:'Trainee',lbl:'LV 1'},{xp:50,name:'Junior',lbl:'LV 2'},{xp:150,name:'Junior+',lbl:'LV 3'},{xp:300,name:'Middle',lbl:'LV 4'},{xp:500,name:'Middle+',lbl:'LV 5'},{xp:750,name:'Senior',lbl:'LV 6'},{xp:1000,name:'Tech Lead',lbl:'LV 7'}];
+let cards=[],stats={},srs={},hmap={};
+let wikiArticles=[],wikiCache={},currentWiki=null;
+let queue=[],qIdx=0,isFlipped=false,activeMode='all';
+let xp=0,streak=0,mLives=3,mActive=false;
+let bQueue=[],bIdx=0,bC=0,bW=0,bTimer=null,bTime=60,bFlipped=false,bRunning=false;
+function getRepo(){return localStorage.getItem('dc_repo')||'YOUR_USERNAME/YOUR_REPO';}
+function rawUrl(p){return`https://raw.githubusercontent.com/${getRepo()}/${BRANCH}/${p}`;}
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function addDays(s,d){const dt=new Date(s);dt.setDate(dt.getDate()+d);return dt.toISOString().slice(0,10);}
+async function init(){
+  stats=JSON.parse(localStorage.getItem('dc_stats')||'{}');srs=JSON.parse(localStorage.getItem('dc_srs')||'{}');
+  hmap=JSON.parse(localStorage.getItem('dc_hmap')||'{}');xp=parseInt(localStorage.getItem('dc_xp')||'0');
+  streak=parseInt(localStorage.getItem('dc_streak')||'0');checkStreak();updateXPUI(false);
+  document.getElementById('repo-input').value=getRepo();document.getElementById('current-repo').textContent=getRepo();
+  await loadCards();
+}
+async function loadCards(){
+  try{const r=await fetch(rawUrl('cards/index.json'),{cache:'no-cache'});if(!r.ok)throw 0;
+    const files=await r.json();const loaded=await Promise.all(files.map(async f=>{try{const r2=await fetch(rawUrl(`cards/${f}`));return r2.ok?parseMD(await r2.text(),f):null;}catch{return null;}}));
+    cards=loaded.filter(Boolean);if(!cards.length)throw 0;
+  }catch{cards=EMBEDDED;}
+  buildModeRow();buildQueue();renderCard();
+}
+function parseFM(text){const fm={};const m=text.match(/^---\n([\s\S]*?)\n---/);if(m)m[1].split('\n').forEach(l=>{const[k,...v]=l.split(':');if(k)fm[k.trim()]=v.join(':').trim().replace(/^["']|["']$/g,'');});return fm;}
+function parseMD(text,fn){
+  const fm=parseFM(text);const body=text.replace(/^---[\s\S]*?---\n/,'');const lines=body.split('\n');let q='',aL=[],inA=false;
+  for(const l of lines){if(l.startsWith('# ')&&!q){q=l.replace(/^# /,'').trim();}else if(l.startsWith('## ')&&l.toLowerCase().includes('ответ')){inA=true;}else if(inA){aL.push(l);}}
+  return{id:fm.id||fn.replace('.md',''),cat:fm.category||'Other',daily:fm.daily==='true',wikiSource:fm.wikiSource||null,q,a:mdToHtml(aL.join('\n').trim())};
+}
+function mdToHtml(md){
+  let h=md.replace(/```(\w*)\n([\s\S]*?)```/g,(_,l,c)=>`<pre><code>${esc(c.trim())}</code></pre>`)
+    .replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g,'<em>$1</em>').replace(/^> (.+)$/gm,'<blockquote>$1</blockquote>')
+    .replace(/^#{1,3} .+$/gm,'').replace(/^[-*] (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>[\s\S]*?<\/li>)/g,m=>`<ul>${m}</ul>`).replace(/<\/ul>\s*<ul>/g,'').replace(/\n\n/g,'</p><p>');
+  h='<p>'+h+'</p>';return h.replace(/<p>\s*(<pre>|<ul>|<blockquote>)/g,'$1').replace(/(<\/pre>|<\/ul>|<\/blockquote>)\s*<\/p>/g,'$1').replace(/<p>\s*<\/p>/g,'');
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function buildModeRow(){
+  const cats=['all','srs','daily',...new Set(cards.map(c=>c.cat)),'marathon'];
+  const lbl={all:'All',srs:'SRS',daily:'Daily',marathon:'Marathon'};
+  document.getElementById('mode-row').innerHTML=cats.map(m=>`<button class="mode-btn${m===activeMode?' active':''}" onclick="setMode('${m}')">${lbl[m]||m}</button>`).join('');
+}
+function setMode(m){
+  activeMode=m;mActive=m==='marathon';if(mActive){mLives=3;renderLives();}
+  buildModeRow();document.getElementById('m-lives').classList.toggle('show',mActive);
+  document.getElementById('srs-label').classList.toggle('show',m==='srs');
+  buildQueue();renderCard();
+}
+function renderLives(){for(let i=1;i<=3;i++)document.getElementById(`ld${i}`).classList.toggle('lost',i>mLives);}
+function buildQueue(){
+  let f=cards;
+  if(activeMode==='daily')f=cards.filter(c=>c.daily);
+  else if(activeMode==='srs'){const today=todayStr();f=cards.filter(c=>{const s=srs[c.id];return!s||s.nextDate<=today;}).sort((a,b)=>(srs[a.id]?.nextDate||'0').localeCompare(srs[b.id]?.nextDate||'0'));queue=f;qIdx=0;return;}
+  else if(activeMode!=='all'&&activeMode!=='marathon')f=cards.filter(c=>c.cat===activeMode);
+  queue=[...f].sort((a,b)=>{const sa=stats[a.id]||{k:0,s:0},sb=stats[b.id]||{k:0,s:0};return(sa.k/(sa.k+sa.s+1))-(sb.k/(sb.k+sb.s+1));});qIdx=0;
+}
+function renderCard(){
+  if(!queue.length){document.getElementById('card-q').innerHTML=activeMode==='srs'?'All reviews complete for today.':'No cards in this mode.';['card-ans','card-cat','card-cat2'].forEach(id=>document.getElementById(id).innerHTML='');document.getElementById('prog-txt').textContent='0 / 0';document.getElementById('prog-fill').style.width='0%';document.getElementById('srs-chip').style.display='none';document.getElementById('card-source').style.display='none';return;}
+  const c=queue[qIdx%queue.length];isFlipped=false;document.getElementById('card').classList.remove('flipped','shake');
+  document.getElementById('card-cat').textContent=c.cat;document.getElementById('card-cat2').textContent=c.cat;
+  document.getElementById('card-q').textContent=c.q;document.getElementById('card-ans').innerHTML=c.a;
+  document.getElementById('card-back').classList.remove('flash-ok','flash-err');
+  const chip=document.getElementById('srs-chip'),sr=srs[c.id];
+  if(activeMode==='srs'&&sr){chip.style.display='';chip.textContent=`+${SRS[Math.min(sr.step||0,SRS.length-1)]}d`;}else chip.style.display='none';
+  const src=document.getElementById('card-source');if(c.wikiSource){src.style.display='';document.getElementById('card-source-link').textContent=c.wikiSource;}else src.style.display='none';
+  document.getElementById('prog-txt').textContent=`${qIdx} / ${queue.length}`;
+  document.getElementById('prog-fill').style.width=`${queue.length?(qIdx/queue.length)*100:0}%`;
+}
+function flipCard(){isFlipped=!isFlipped;document.getElementById('card').classList.toggle('flipped',isFlipped);}
+function openWikiSource(){const c=queue[qIdx%queue.length];if(c?.wikiSource){const a=wikiArticles.find(x=>x.title===c.wikiSource);if(a){showPage('wiki');loadWikiArticle(a);}}}
+function answer(know){
+  if(!queue.length)return;const c=queue[qIdx%queue.length];
+  if(!stats[c.id])stats[c.id]={k:0,s:0};if(know)stats[c.id].k++;else stats[c.id].s++;
+  if(!srs[c.id])srs[c.id]={step:0,nextDate:todayStr()};
+  if(know){const st=Math.min((srs[c.id].step||0)+1,SRS.length-1);srs[c.id].step=st;srs[c.id].nextDate=addDays(todayStr(),SRS[st-1]||1);}
+  else{srs[c.id].step=0;srs[c.id].nextDate=addDays(todayStr(),1);}
+  const today=todayStr();hmap[today]=(hmap[today]||0)+1;gainXP(know?10:2);
+  const back=document.getElementById('card-back');
+  if(know){launchConfetti();back.classList.add('flash-ok');setTimeout(()=>back.classList.remove('flash-ok'),400);}
+  else{document.getElementById('card').classList.add('shake');back.classList.add('flash-err');setTimeout(()=>{document.getElementById('card').classList.remove('shake');back.classList.remove('flash-err');},420);
+    if(mActive){mLives--;renderLives();if(mLives<=0){showToast('Marathon failed. Starting over.');mLives=3;renderLives();saveAll();buildQueue();renderCard();return;}}}
+  saveAll();qIdx++;
+  if(qIdx>=queue.length){if(mActive&&mLives>0){showToast('Marathon complete.');launchConfetti();launchConfetti();}else showToast('Round complete.');buildQueue();}
+  setTimeout(renderCard,know?180:520);
+}
+function startBoss(){
+  document.getElementById('boss-start').style.display='none';bQueue=[...cards].sort(()=>Math.random()-.5).slice(0,10);
+  bIdx=0;bC=0;bW=0;bTime=60;bRunning=true;bFlipped=false;
+  document.getElementById('bskip').disabled=false;document.getElementById('bknow').disabled=false;renderBossCard();
+  bTimer=setInterval(()=>{bTime--;document.getElementById('boss-timer').textContent=bTime+'s';if(bTime<=0)endBoss();},1000);
+}
+function renderBossCard(){
+  if(bIdx>=bQueue.length){endBoss();return;}const c=bQueue[bIdx];bFlipped=false;
+  document.getElementById('boss-card').classList.remove('flipped','shake');
+  document.getElementById('boss-cat').textContent=c.cat;document.getElementById('boss-cat2').textContent=c.cat;
+  document.getElementById('boss-q').textContent=c.q;document.getElementById('boss-ans').innerHTML=c.a;
+  document.getElementById('bc').textContent=bC;document.getElementById('bw').textContent=bW;
+  document.getElementById('boss-prog').style.width=`${(bIdx/10)*100}%`;document.getElementById('boss-prog-txt').textContent=`${bIdx} / 10`;
+}
+function bossFlip(){bFlipped=!bFlipped;document.getElementById('boss-card').classList.toggle('flipped',bFlipped);}
+function bossAns(know){if(!bRunning||bIdx>=bQueue.length)return;if(know){bC++;launchConfetti();}else{bW++;document.getElementById('boss-card').classList.add('shake');setTimeout(()=>document.getElementById('boss-card').classList.remove('shake'),420);}bIdx++;if(bIdx>=10)endBoss();else renderBossCard();}
+function endBoss(){if(!bRunning)return;bRunning=false;clearInterval(bTimer);document.getElementById('bskip').disabled=true;document.getElementById('bknow').disabled=true;document.getElementById('boss-quiz').style.display='none';document.getElementById('boss-result').style.display='flex';const pct=Math.round((bC/10)*100);const g=pct>=90?'S':pct>=70?'A':pct>=50?'B':pct>=30?'C':'D';const msgs={S:'Perfect. Interview-ready.',A:'Strong. Minor gaps remain.',B:'Good. Review weak areas.',C:'Decent start. Keep going.',D:'Keep studying. It takes time.'};document.getElementById('boss-grade').textContent=g;document.getElementById('boss-sub').innerHTML=`${bC}/10 correct &nbsp;·&nbsp; ${60-bTime}s used<br>${msgs[g]}`;gainXP(bC*5);if(pct>=90){launchConfetti();launchConfetti();}}
+function resetBoss(){document.getElementById('boss-result').style.display='none';document.getElementById('boss-quiz').style.display='flex';document.getElementById('boss-start').style.display='';document.getElementById('boss-timer').textContent='60s';document.getElementById('bc').textContent='0';document.getElementById('bw').textContent='0';document.getElementById('boss-prog').style.width='0%';document.getElementById('boss-prog-txt').textContent='0 / 10';document.getElementById('boss-q').textContent='Press Start to begin Boss Mode';document.getElementById('boss-ans').innerHTML='';}
+async function loadWikiIndex(){
+  const sb=document.getElementById('wiki-sidebar');
+  try{const r=await fetch(rawUrl('wiki/index.json'),{cache:'no-cache'});if(!r.ok)throw 0;
+    const files=await r.json();
+    const metas=await Promise.all(files.map(async f=>{try{const r2=await fetch(rawUrl(`wiki/${f}`));if(!r2.ok)return null;const text=await r2.text();const fm=parseFM(text);return{file:f,title:fm.title||f.replace('.md',''),cat:fm.category||'General',text};}catch{return null;}}));
+    wikiArticles=metas.filter(Boolean);buildWikiSidebar();
+  }catch{sb.innerHTML='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted2);padding:.5rem">Set your repo in Setup tab to load wiki.</div>';}
+}
+function buildWikiSidebar(){
+  const cats=[...new Set(wikiArticles.map(a=>a.cat))];let html='<div class="wiki-sidebar-title">Wiki</div>';
+  cats.forEach(cat=>{html+=`<div class="wiki-nav-cat">${cat}</div>`;wikiArticles.filter(a=>a.cat===cat).forEach(a=>{html+=`<button class="wiki-nav-btn${currentWiki?.file===a.file?' active':''}" onclick="loadWikiArticle(wikiArticles.find(x=>x.file==='${a.file}'))">${a.title}</button>`;});});
+  document.getElementById('wiki-sidebar').innerHTML=html;
+}
+function extractQuestions(body){const lines=body.split('\n');let inC=false,qs=[];for(const l of lines){if(/^## (cards|карточки)/i.test(l)){inC=true;continue;}if(inC&&l.startsWith('##')){inC=false;continue;}if(inC&&/^[-*] /.test(l))qs.push(l.replace(/^[-*] /,'').trim());}return qs;}
+async function loadWikiArticle(art){
+  if(!art)return;currentWiki=art;buildWikiSidebar();
+  const content=document.getElementById('wiki-content');content.innerHTML='<div class="wiki-empty"><p>Loading...</p></div>';
+  const text=art.text;if(!text){content.innerHTML='<div class="wiki-empty"><p>Could not load article.</p></div>';return;}
+  const body=text.replace(/^---[\s\S]*?---\n/,'');const qs=extractQuestions(body);
+  content.innerHTML=`<div class="wiki-article">${wikiMdToHtml(body,art.cat)}</div><div class="wiki-actions"><button class="btn-gen" id="gen-btn" onclick="generateCards('${art.file}','${art.title}','${art.cat}')" ${qs.length?'':'disabled'}>${qs.length?`Generate ${qs.length} cards with AI`:'No card questions in ## Cards'}</button><span class="gen-status" id="gen-status"></span></div>`;
+  try{await mermaid.run({nodes:content.querySelectorAll('.mermaid')});}catch(e){}
+}
+function wikiMdToHtml(md,cat){
+  md=md.replace(/```mermaid\n([\s\S]*?)```/g,(_,c)=>`<div class="mermaid">${c.trim()}</div>`);
+  md=md.replace(/(\|.+\|\n)+/g,tbl=>{const rows=tbl.trim().split('\n').filter(r=>!/^\|[-:\s|]+\|$/.test(r));return'<table>'+rows.map((r,i)=>{const cells=r.split('|').slice(1,-1);const tag=i===0?'th':'td';return'<tr>'+cells.map(c=>`<${tag}>${c.trim()}</${tag}>`).join('')+'</tr>';}).join('')+'</table>';});
+  let h=md.replace(/```(\w*)\n([\s\S]*?)```/g,(_,l,c)=>`<pre><code>${esc(c.trim())}</code></pre>`)
+    .replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g,'<em>$1</em>').replace(/^> (.+)$/gm,'<blockquote>$1</blockquote>')
+    .replace(/^# (.+)$/gm,`<h1>$1</h1><span class="wiki-cat">${cat||''}</span>`)
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^[-*] (.+)$/gm,'<li>$1</li>').replace(/(<li>[\s\S]*?<\/li>)/g,m=>`<ul>${m}</ul>`).replace(/<\/ul>\s*<ul>/g,'')
+    .replace(/\n\n/g,'</p><p>');
+  h='<p>'+h+'</p>';return h.replace(/<p>\s*(<h[1-3]>|<pre>|<ul>|<blockquote>|<table>|<div)/g,'$1').replace(/(<\/h[1-3]>|<\/pre>|<\/ul>|<\/blockquote>|<\/table>|<\/div>)\s*<\/p>/g,'$1').replace(/<p>\s*<\/p>/g,'');
+}
+async function generateCards(file,title,cat){
+  const btn=document.getElementById('gen-btn'),status=document.getElementById('gen-status');
+  btn.disabled=true;btn.textContent='Generating...';status.textContent='';status.className='gen-status';
+  const art=wikiArticles.find(a=>a.file===file);if(!art)return;
+  const qs=extractQuestions(art.text.replace(/^---[\s\S]*?---\n/,''));
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:`Create flashcards from this developer wiki article.\n\nTitle: "${title}"\nCategory: "${cat}"\n\nArticle:\n${art.text}\n\nQuestions:\n${qs.map((q,i)=>`${i+1}. ${q}`).join('\n')}\n\nFor each question write a concise answer (2-5 sentences) based on the article. Use code examples where helpful. Use simple markdown.\n\nRespond ONLY with valid JSON array, no backticks:\n[{"q":"question","a":"answer in markdown"},...]`}]})});
+    const data=await resp.json();const raw=data.content.map(b=>b.text||'').join('').replace(/\x60\x60\x60json|\x60\x60\x60/g,'').trim();
+    const generated=JSON.parse(raw);let added=0;
+    generated.forEach((item,i)=>{if(!cards.find(c=>c.q===item.q)){cards.push({id:`wiki-${file.replace('.md','')}-${i}-${Date.now()}`,cat,daily:false,wikiSource:title,q:item.q,a:mdToHtml(item.a)});added++;}});
+    if(added>0){buildModeRow();buildQueue();renderCard();}
+    status.textContent=`${added} card${added!==1?'s':''} added.`;status.className='gen-status ok';
+    btn.textContent=`Generate ${qs.length} cards with AI`;btn.disabled=false;
+    if(added>0)showToast(`${added} new cards added`);
+  }catch(e){status.textContent='Failed. Check API access.';status.className='gen-status err';btn.textContent=`Generate ${qs.length} cards with AI`;btn.disabled=false;}
+}
+function gainXP(n){const prev=getLv(xp);xp+=n;localStorage.setItem('dc_xp',xp);const next=getLv(xp);updateXPUI(true);showXPPop(`+${n} XP`);if(next.idx>prev.idx)showLevelUp(next);}
+function getLv(x){let idx=0;for(let i=LEVELS.length-1;i>=0;i--){if(x>=LEVELS[i].xp){idx=i;break;}}const c=LEVELS[idx],n=LEVELS[idx+1];const inL=x-c.xp,need=n?n.xp-c.xp:100;return{idx,name:c.name,lbl:c.lbl,pct:Math.min(100,Math.round((inL/need)*100))};}
+function updateXPUI(anim){const lv=getLv(xp);document.getElementById('lv-badge').textContent=lv.lbl;const f=document.getElementById('xp-fill');f.style.transition=anim?'width .5s':'none';f.style.width=lv.pct+'%';document.getElementById('streak-val').textContent=streak;}
+function showXPPop(msg){const el=document.getElementById('xp-pop');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1400);}
+function showLevelUp(lv){document.getElementById('lu-lv').textContent=lv.lbl;document.getElementById('lu-name').textContent=lv.name;document.getElementById('lu-overlay').classList.add('show');launchConfetti();launchConfetti();setTimeout(()=>document.getElementById('lu-overlay').classList.remove('show'),3200);}
+function checkStreak(){const today=new Date().toDateString(),last=localStorage.getItem('dc_last_day'),yest=new Date(Date.now()-86400000).toDateString();if(last===today)return;streak=(last===yest)?streak+1:1;localStorage.setItem('dc_streak',streak);localStorage.setItem('dc_last_day',today);}
+function renderStats(){
+  let tk=0,ts=0;cards.forEach(c=>{const s=stats[c.id]||{k:0,s:0};tk+=s.k;ts+=s.s;});const lv=getLv(xp);
+  document.getElementById('stats-grid').innerHTML=[['Cards',cards.length,'var(--text)'],['Correct',tk,'var(--know)'],['Incorrect',ts,'var(--skip)'],['XP',xp,'var(--accent)'],['Level',lv.name,'var(--gold)'],['Streak',streak,'var(--text)']].map(([l,v,c])=>`<div class="stat-card"><div class="stat-lbl">${l}</div><div class="stat-val" style="color:${c}">${v}</div></div>`).join('');
+  renderHeatmap();
+  const cats=[...new Set(cards.map(c=>c.cat))];
+  document.getElementById('cat-list').innerHTML=cats.map(cat=>{const cc=cards.filter(c=>c.cat===cat);const k=cc.filter(c=>{const s=stats[c.id]||{k:0,s:0};return s.k>s.s;}).length;const p=Math.round((k/cc.length)*100);return`<div class="cat-row"><div class="cat-name">${cat}</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${p}%"></div></div><div class="cat-pct">${p}%</div></div>`;}).join('');
+  const today=todayStr();const up=cards.filter(c=>srs[c.id]&&srs[c.id].nextDate>today).sort((a,b)=>srs[a.id].nextDate.localeCompare(srs[b.id].nextDate)).slice(0,5);
+  document.getElementById('srs-upcoming').innerHTML=up.length?up.map(c=>`<div class="srs-row"><span class="srs-q">${c.q.slice(0,55)}${c.q.length>55?'…':''}</span><span class="srs-date">${srs[c.id].nextDate}</span></div>`).join(''):`<div style="font-family:var(--mono);font-size:.7rem;color:var(--muted2);padding:.4rem 0">No upcoming reviews.</div>`;
+}
+function renderHeatmap(){
+  const wrap=document.getElementById('heatmap');wrap.innerHTML='';const today=new Date();
+  for(let w=25;w>=0;w--){const col=document.createElement('div');col.className='hm-col';for(let d=0;d<7;d++){const dt=new Date(today);dt.setDate(dt.getDate()-w*7-d);const key=dt.toISOString().slice(0,10);const v=hmap[key]||0;const cell=document.createElement('div');cell.className='hm-cell';if(v>0)cell.setAttribute('data-v',v>=8?4:v>=4?3:v>=2?2:1);cell.title=`${key}: ${v}`;col.appendChild(cell);}wrap.appendChild(col);}
+}
+const cv=document.getElementById('confetti-canvas'),cx=cv.getContext('2d');let parts=[],animId=null;
+function launchConfetti(){cv.width=innerWidth;cv.height=innerHeight;const colors=['#c8f53a','#2ecc71','#e8b84b','#4a9eff','#e74c3c','#e8e4dc'];for(let i=0;i<55;i++)parts.push({x:Math.random()*cv.width,y:-10,vx:(Math.random()-.5)*6,vy:Math.random()*4+2,size:Math.random()*6+3,color:colors[Math.floor(Math.random()*colors.length)],rot:Math.random()*360,rotV:(Math.random()-.5)*8,shape:Math.random()>.5?'r':'c',opacity:1,g:.12});if(!animId)animConf();}
+function animConf(){cx.clearRect(0,0,cv.width,cv.height);parts=parts.filter(p=>p.opacity>0);parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.rot+=p.rotV;if(p.y>cv.height*.65)p.opacity-=.04;cx.save();cx.globalAlpha=p.opacity;cx.translate(p.x,p.y);cx.rotate(p.rot*Math.PI/180);cx.fillStyle=p.color;if(p.shape==='r')cx.fillRect(-p.size/2,-p.size/4,p.size,p.size/2);else{cx.beginPath();cx.arc(0,0,p.size/2,0,Math.PI*2);cx.fill();}cx.restore();});if(parts.length){animId=requestAnimationFrame(animConf);}else{animId=null;cx.clearRect(0,0,cv.width,cv.height);}}
+function saveAll(){localStorage.setItem('dc_stats',JSON.stringify(stats));localStorage.setItem('dc_srs',JSON.stringify(srs));localStorage.setItem('dc_hmap',JSON.stringify(hmap));}
+function resetAll(){if(!confirm('Reset all progress?'))return;['dc_stats','dc_srs','dc_hmap','dc_xp','dc_streak','dc_last_day'].forEach(k=>localStorage.removeItem(k));stats={};srs={};hmap={};xp=0;streak=0;updateXPUI(false);renderStats();showToast('Progress reset.');}
+function saveRepo(){const v=document.getElementById('repo-input').value.trim();if(!v||!v.includes('/')){showToast('Format: username/repo');return;}localStorage.setItem('dc_repo',v);document.getElementById('current-repo').textContent=v;showToast('Saved. Reloading...');setTimeout(()=>{loadCards();loadWikiIndex();},600);}
+function showPage(n){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('nav button').forEach((b,i)=>b.classList.toggle('active',['study','boss','wiki','stats','help'][i]===n));document.getElementById(n+'-page').classList.add('active');if(n==='stats')renderStats();if(n==='wiki'&&!wikiArticles.length)loadWikiIndex();}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();flipCard();}if(e.key==='ArrowRight')answer(true);if(e.key==='ArrowLeft')answer(false);});
+const EMBEDDED=[
+  {id:'closure',cat:'Frontend',daily:true,q:'What is a closure?',a:'<p>A function that <strong>remembers variables from its outer scope</strong> even after the outer function returns.</p><pre><code>function counter() {\n  let n = 0;\n  return () => ++n;\n}\nconst c = counter();\nc(); // 1\nc(); // 2</code></pre>'},
+  {id:'event-loop',cat:'Frontend',daily:true,q:'What is the Event Loop?',a:'<p>Mechanism making JS asynchronous. Order: <strong>Call Stack → Microtasks</strong> (Promise.then) <strong>→ Macrotasks</strong> (setTimeout).</p>'},
+  {id:'display',cat:'Frontend',daily:false,q:'display: block vs inline vs inline-block?',a:'<ul><li><strong>block</strong> — full width, new line</li><li><strong>inline</strong> — content width, no dimensions</li><li><strong>inline-block</strong> — inline but accepts width/height</li></ul>'},
+  {id:'eq',cat:'Frontend',daily:false,q:'== vs === in JavaScript?',a:'<p><code>==</code> coerces types: <code>"5" == 5</code> → true.<br><code>===</code> strict: <code>"5" === 5</code> → false. Always use <strong>===</strong>.</p>'},
+  {id:'useeffect',cat:'Frontend',daily:true,q:'How does useEffect dependency array work?',a:'<pre><code>useEffect(() => {}, [])      // once on mount\nuseEffect(() => {}, [count]) // on count change\nuseEffect(() => {})          // every render</code></pre>'},
+  {id:'rest',cat:'Backend',daily:true,q:'What is REST API?',a:'<ul><li><strong>Stateless</strong> — no client state on server</li><li>Resources via URL: <code>/users</code>, <code>/posts/1</code></li><li>HTTP verbs: GET POST PUT PATCH DELETE</li></ul>'},
+  {id:'http-codes',cat:'Backend',daily:false,q:'HTTP status codes: 200 201 400 401 403 404 500?',a:'<ul><li><code>200</code> OK · <code>201</code> Created</li><li><code>400</code> Bad Request · <code>401</code> Unauthorized · <code>403</code> Forbidden</li><li><code>404</code> Not Found · <code>500</code> Internal Server Error</li></ul>'},
+  {id:'joins',cat:'Backend',daily:false,q:'INNER JOIN vs LEFT JOIN?',a:'<p><strong>INNER JOIN</strong> — only matching rows in both tables.</p><p><strong>LEFT JOIN</strong> — all rows from left + matches from right (NULL if none).</p>'},
+  {id:'middleware',cat:'Backend',daily:true,q:'What is middleware?',a:'<p>A function between request and response.</p><pre><code>app.use((req, res, next) => {\n  console.log(req.method);\n  next();\n});</code></pre>'},
+  {id:'pr-review',cat:'English',daily:true,q:'How to ask a colleague to review your code?',a:'<blockquote>Hey, could you review my PR when you have a moment? I\'d appreciate your feedback.</blockquote><ul><li><code>take a look</code> — review/check</li><li><code>when you have a moment</code> — at your convenience</li></ul>'},
+  {id:'tenses-en',cat:'English',daily:false,q:'"I work" vs "I am working"?',a:'<p><strong>I work</strong> — habitual: <em>"I work at a startup."</em></p><p><strong>I am working</strong> — right now: <em>"I am working on a bug fix."</em></p>'},
+  {id:'deploy-en',cat:'English',daily:true,q:'What does "deploy to production" mean?',a:'<p>Publishing code to the live server used by real users.</p><ul><li><code>production</code> — live environment</li><li><code>staging</code> — pre-release testing</li></ul>'},
+];
+init();
+</script>
+</body>
+</html>
