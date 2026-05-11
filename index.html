@@ -340,7 +340,7 @@ let wikiArticles=[],wikiCache={},currentWiki=null;
 let queue=[],qIdx=0,isFlipped=false,activeMode='all';
 let xp=0,streak=0,mLives=3,mActive=false;
 let bQueue=[],bIdx=0,bC=0,bW=0,bTimer=null,bTime=60,bFlipped=false,bRunning=false;
-function getRepo(){return localStorage.getItem('dc_repo')||'YOUR_USERNAME/YOUR_REPO';}
+function getRepo(){return localStorage.getItem('dc_repo')||'ruhxmai/lazy';}
 function rawUrl(p){return`https://raw.githubusercontent.com/${getRepo()}/${BRANCH}/${p}`;}
 function todayStr(){return new Date().toISOString().slice(0,10);}
 function addDays(s,d){const dt=new Date(s);dt.setDate(dt.getDate()+d);return dt.toISOString().slice(0,10);}
@@ -353,7 +353,7 @@ async function init(){
 }
 async function loadCards(){
   try{const r=await fetch(rawUrl('cards/index.json'),{cache:'no-cache'});if(!r.ok)throw 0;
-    const files=await r.json();const loaded=await Promise.all(files.map(async f=>{try{const r2=await fetch(rawUrl(`cards/${f}`));return r2.ok?parseMD(await r2.text(),f):null;}catch{return null;}}));
+    const files=await r.json();const loaded=await Promise.all(files.map(async f=>{try{const r2=await fetch(rawUrl(`cards/${f}`),{cache:'no-cache'});return r2.ok?parseMD(await r2.text(),f):null;}catch{return null;}}));
     cards=loaded.filter(Boolean);if(!cards.length)throw 0;
   }catch{cards=EMBEDDED;}
   buildModeRow();buildQueue();renderCard();
@@ -463,13 +463,13 @@ async function loadWikiIndex(){
   const sb=document.getElementById('wiki-sidebar');
   try{const r=await fetch(rawUrl('wiki/index.json'),{cache:'no-cache'});if(!r.ok)throw 0;
     const files=await r.json();
-    const metas=await Promise.all(files.map(async f=>{try{const r2=await fetch(rawUrl(`wiki/${f}`));if(!r2.ok)return null;const text=await r2.text();const fm=parseFM(text);return{file:f,title:fm.title||f.replace('.md',''),cat:fm.category||'General',text};}catch{return null;}}));
+    const metas=await Promise.all(files.map(async f=>{try{const r2=await fetch(rawUrl(`wiki/${f}`),{cache:'no-cache'});if(!r2.ok)return null;const text=await r2.text();const fm=parseFM(text);return{file:f,title:fm.title||f.replace('.md',''),cat:fm.category||'General',text};}catch{return null;}}));
     wikiArticles=metas.filter(Boolean);buildWikiSidebar();
   }catch{sb.innerHTML='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted2);padding:.5rem">Set your repo in Setup tab to load wiki.</div>';}
 }
 function buildWikiSidebar(){
   const cats=[...new Set(wikiArticles.map(a=>a.cat))];let html='<div class="wiki-sidebar-title">Wiki</div>';
-  cats.forEach(cat=>{html+=`<div class="wiki-nav-cat">${cat}</div>`;wikiArticles.filter(a=>a.cat===cat).forEach(a=>{html+=`<button class="wiki-nav-btn${currentWiki?.file===a.file?' active':''}" onclick="loadWikiArticle(wikiArticles.find(x=>x.file==='${a.file}'))">${a.title}</button>`;});});
+  cats.forEach(cat=>{html+=`<div class="wiki-nav-cat">${cat}</div>`;wikiArticles.filter(a=>a.cat===cat).forEach(a=>{html+=`<button class="wiki-nav-btn${currentWiki?.file===a.file?' active':''}" onclick="loadWikiArticle(wikiArticles.find(x=>x.file==='${a.file}'))">  ${a.title}</button>`;});});
   document.getElementById('wiki-sidebar').innerHTML=html;
 }
 function extractQuestions(body){const lines=body.split('\n');let inC=false,qs=[];for(const l of lines){if(/^## (cards|карточки)/i.test(l)){inC=true;continue;}if(inC&&l.startsWith('##')){inC=false;continue;}if(inC&&/^[-*] /.test(l))qs.push(l.replace(/^[-*] /,'').trim());}return qs;}
