@@ -193,6 +193,26 @@ nav button:hover:not(.active){color:var(--text)}
 #confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:999}
 .toast{position:fixed;bottom:1.75rem;left:50%;transform:translateX(-50%) translateY(14px);background:var(--s2);border:1px solid var(--b2);color:var(--text);font-family:var(--mono);font-size:.72rem;padding:6px 15px;border-radius:2px;opacity:0;transition:opacity .18s,transform .18s;pointer-events:none;z-index:1000;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* LOGIN */
+.login-overlay{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:500}
+.login-box{background:var(--s1);border:1px solid var(--b2);border-radius:var(--r2);padding:2.5rem 2rem;display:flex;flex-direction:column;gap:1rem;max-width:280px;width:90%;text-align:center}
+.login-logo{font-size:.72rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
+.login-sub{font-family:var(--mono);font-size:.7rem;color:var(--muted2);line-height:1.6}
+.login-inp{background:var(--s2);border:1px solid var(--b);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:.88rem;padding:9px 12px;outline:none;text-align:center;width:100%;transition:border-color .15s;box-sizing:border-box}
+.login-inp:focus{border-color:rgba(200,245,58,.5)}
+.login-btn{background:var(--accent);border:none;border-radius:var(--r);color:#0c0c0c;font-family:var(--sans);font-size:.78rem;font-weight:700;letter-spacing:.04em;padding:9px;cursor:pointer;transition:opacity .15s}
+.login-btn:hover{opacity:.87}
+.login-sep{font-family:var(--mono);font-size:.57rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:.25rem}
+.login-users{display:flex;flex-direction:column;gap:4px}
+.login-user-btn{background:var(--s2);border:1px solid var(--b);border-radius:8px;color:var(--muted2);font-family:var(--mono);font-size:.72rem;padding:6px 12px;cursor:pointer;transition:border-color .15s,color .15s;text-align:left}
+.login-user-btn:hover{border-color:var(--b2);color:var(--text)}
+/* LEARNED BUTTON */
+.learn-row{width:100%;max-width:560px;display:flex;justify-content:flex-start}
+.btn-learn{background:transparent;border:1px solid rgba(200,245,58,.2);border-radius:6px;color:var(--muted2);font-family:var(--mono);font-size:.62rem;padding:4px 12px;cursor:pointer;transition:all .15s;letter-spacing:.02em}
+.btn-learn:hover{border-color:var(--accent);color:var(--accent);background:var(--ad)}
+.btn-learn.is-learned{background:var(--ad);border-color:rgba(200,245,58,.4);color:var(--accent)}
+
 @media(max-width:640px){
   header{padding:.85rem 1rem} nav{padding:0 .5rem} nav button{padding:.8rem .85rem;font-size:.65rem}
   #study-page{padding:1.25rem 1rem} .card-face{padding:1.35rem 1.5rem} .card-q{font-size:1rem}
@@ -204,6 +224,15 @@ nav button:hover:not(.active){color:var(--text)}
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
+<div class="login-overlay" id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">Dev Cards</div>
+    <div class="login-sub">Как тебя зовут?<br>Прогресс сохраняется по имени.</div>
+    <input class="login-inp" type="text" id="login-input" placeholder="имя" maxlength="20" autocomplete="off">
+    <button class="login-btn" onclick="doLogin()">Войти</button>
+    <div id="known-users" class="login-users"></div>
+  </div>
+</div>
 <div class="lu-overlay" id="lu-overlay" onclick="this.classList.remove('show')">
   <div class="lu-box"><div class="lu-tag">Level up</div><div class="lu-lv" id="lu-lv"></div><div class="lu-name" id="lu-name"></div></div>
 </div>
@@ -251,6 +280,7 @@ nav button:hover:not(.active){color:var(--text)}
     <button class="btn-flip" onclick="flipCard()">flip</button>
     <button class="btn-know" onclick="answer(true)">correct</button>
   </div>
+  <div class="learn-row"><button class="btn-learn" id="btn-learn" onclick="markLearnedCurrent()">✓ Изучено</button></div>
 </div>
 
 <div id="boss-page" class="page">
@@ -296,6 +326,14 @@ nav button:hover:not(.active){color:var(--text)}
 </div>
 
 <div id="help-page" class="page">
+  <div class="help-s"><h3>Профиль</h3>
+    <p>Пользователь: <code id="current-user">—</code></p>
+    <p style="margin-top:.4rem">Изучено: <code id="learned-count">0</code> из <code id="total-count">0</code> карточек</p>
+    <div style="display:flex;gap:8px;margin-top:.75rem;flex-wrap:wrap">
+      <button class="btn-reset" onclick="switchUser()" style="color:var(--accent);border-color:rgba(200,245,58,.25)">Сменить пользователя</button>
+      <button class="btn-reset" onclick="resetLearned()">Сбросить изученные</button>
+    </div>
+  </div>
   <div class="help-s"><h3>GitHub repository</h3><div class="cfg-row"><input type="text" id="repo-input" placeholder="username/repo-name"><button onclick="saveRepo()">Save</button></div><p style="margin-top:.5rem">Current: <code id="current-repo">—</code></p></div>
   <div class="help-s"><h3>Repository structure</h3><pre>my-repo/
 ├── cards/
@@ -335,28 +373,113 @@ mermaid.initialize({startOnLoad:false,theme:'dark',themeVariables:{background:'#
 const BRANCH='main';
 const SRS=[1,3,7,14,30];
 const LEVELS=[{xp:0,name:'Trainee',lbl:'LV 1'},{xp:50,name:'Junior',lbl:'LV 2'},{xp:150,name:'Junior+',lbl:'LV 3'},{xp:300,name:'Middle',lbl:'LV 4'},{xp:500,name:'Middle+',lbl:'LV 5'},{xp:750,name:'Senior',lbl:'LV 6'},{xp:1000,name:'Tech Lead',lbl:'LV 7'}];
-let cards=[],stats={},srs={},hmap={};
+let cards=[],stats={},srs={},hmap={},learned=new Set();
 let wikiArticles=[],wikiCache={},currentWiki=null;
 let queue=[],qIdx=0,isFlipped=false,activeMode='all';
 let xp=0,streak=0,mLives=3,mActive=false;
 let bQueue=[],bIdx=0,bC=0,bW=0,bTimer=null,bTime=60,bFlipped=false,bRunning=false;
+
+// REPO
 function getRepo(){return localStorage.getItem('dc_repo')||'ruhxmai/lazy';}
 function rawUrl(p){return`https://raw.githubusercontent.com/${getRepo()}/${BRANCH}/${p}`;}
 function todayStr(){return new Date().toISOString().slice(0,10);}
 function addDays(s,d){const dt=new Date(s);dt.setDate(dt.getDate()+d);return dt.toISOString().slice(0,10);}
-async function init(){
-  stats=JSON.parse(localStorage.getItem('dc_stats')||'{}');srs=JSON.parse(localStorage.getItem('dc_srs')||'{}');
-  hmap=JSON.parse(localStorage.getItem('dc_hmap')||'{}');xp=parseInt(localStorage.getItem('dc_xp')||'0');
-  streak=parseInt(localStorage.getItem('dc_streak')||'0');checkStreak();updateXPUI(false);
-  document.getElementById('repo-input').value=getRepo();document.getElementById('current-repo').textContent=getRepo();
+
+// USER / NAMESPACE
+function getUser(){return localStorage.getItem('dc_user')||'';}
+function uk(k){const u=getUser();return u?`dc_${u}_${k}`:`dc_${k}`;}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// LOGIN
+function checkLogin(){
+  if(!getUser()){
+    const users=[];
+    for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);const m=k&&k.match(/^dc_(.+)_xp$/);if(m&&m[1])users.push(m[1]);}
+    const ku=document.getElementById('known-users');
+    if(users.length){
+      ku.innerHTML='<div class="login-sep">или выбери</div>'+users.map(u=>`<button class="login-user-btn" onclick="quickLogin('${escHtml(u)}')">${escHtml(u)}</button>`).join('');
+    }
+    document.getElementById('login-overlay').style.display='flex';
+    setTimeout(()=>document.getElementById('login-input').focus(),60);
+    return false;
+  }
+  return true;
+}
+function doLogin(){
+  const v=document.getElementById('login-input').value.trim().replace(/[<>"']/g,'').slice(0,20);
+  if(!v)return;
+  localStorage.setItem('dc_user',v);
+  document.getElementById('login-overlay').style.display='none';
+  initApp();
+}
+function quickLogin(name){localStorage.setItem('dc_user',name);document.getElementById('login-overlay').style.display='none';initApp();}
+function switchUser(){if(!confirm('Сменить пользователя? Твой прогресс сохранён.'))return;localStorage.removeItem('dc_user');location.reload();}
+
+// INIT
+function init(){if(!checkLogin())return;initApp();}
+async function initApp(){
+  stats=JSON.parse(localStorage.getItem(uk('stats'))||'{}');
+  srs=JSON.parse(localStorage.getItem(uk('srs'))||'{}');
+  hmap=JSON.parse(localStorage.getItem(uk('hmap'))||'{}');
+  xp=parseInt(localStorage.getItem(uk('xp'))||'0');
+  streak=parseInt(localStorage.getItem(uk('streak'))||'0');
+  learned=new Set(JSON.parse(localStorage.getItem(uk('learned'))||'[]'));
+  checkStreak();updateXPUI(false);
+  document.getElementById('repo-input').value=getRepo();
+  document.getElementById('current-repo').textContent=getRepo();
+  updateProfileUI();
   await loadCards();
 }
+function updateProfileUI(){
+  const el=document.getElementById('current-user');if(el)el.textContent=getUser()||'—';
+  const lc=document.getElementById('learned-count');if(lc)lc.textContent=learned.size;
+  const tc=document.getElementById('total-count');if(tc)tc.textContent=cards.length;
+}
+
+// LEARNED
+function isLearned(id){return learned.has(id);}
+function markLearnedCurrent(){
+  if(!queue.length)return;
+  const c=queue[qIdx%queue.length];
+  if(isLearned(c.id)){
+    learned.delete(c.id);
+    localStorage.setItem(uk('learned'),JSON.stringify([...learned]));
+    updateProfileUI();buildModeRow();renderLearnBtn();
+    showToast('Возвращено в очередь');
+    return;
+  }
+  learned.add(c.id);
+  localStorage.setItem(uk('learned'),JSON.stringify([...learned]));
+  saveAll();updateProfileUI();buildModeRow();
+  showToast('Изучено ✓ — убрано из очереди');
+  qIdx++;
+  if(qIdx>=queue.length){buildQueue();}
+  setTimeout(renderCard,300);
+}
+function renderLearnBtn(){
+  const c=queue.length?queue[qIdx%queue.length]:null;
+  const btn=document.getElementById('btn-learn');
+  if(!btn)return;
+  if(!c){btn.style.display='none';return;}
+  btn.style.display='';
+  const il=isLearned(c.id);
+  btn.textContent=il?'↩ Вернуть в очередь':'✓ Изучено';
+  btn.classList.toggle('is-learned',il);
+}
+function resetLearned(){
+  if(!confirm('Сбросить все изученные карточки?'))return;
+  learned=new Set();localStorage.removeItem(uk('learned'));
+  updateProfileUI();buildModeRow();buildQueue();renderCard();
+  showToast('Изученные сброшены');
+}
+
+// CARDS
 async function loadCards(){
   try{const r=await fetch(rawUrl('cards/index.json'),{cache:'no-cache'});if(!r.ok)throw 0;
     const files=await r.json();const loaded=await Promise.all(files.map(async f=>{try{const r2=await fetch(rawUrl(`cards/${f}`),{cache:'no-cache'});return r2.ok?parseMD(await r2.text(),f):null;}catch{return null;}}));
     cards=loaded.filter(Boolean);if(!cards.length)throw 0;
   }catch{cards=EMBEDDED;}
-  buildModeRow();buildQueue();renderCard();
+  updateProfileUI();buildModeRow();buildQueue();renderCard();
 }
 function parseFM(text){const fm={};const m=text.match(/^---\n([\s\S]*?)\n---/);if(m)m[1].split('\n').forEach(l=>{const[k,...v]=l.split(':');if(k)fm[k.trim()]=v.join(':').trim().replace(/^["']|["']$/g,'');});return fm;}
 function parseMD(text,fn){
@@ -373,9 +496,11 @@ function mdToHtml(md){
   h='<p>'+h+'</p>';return h.replace(/<p>\s*(<pre>|<ul>|<blockquote>)/g,'$1').replace(/(<\/pre>|<\/ul>|<\/blockquote>)\s*<\/p>/g,'$1').replace(/<p>\s*<\/p>/g,'');
 }
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// MODES
 function buildModeRow(){
-  const cats=['all','srs','daily',...new Set(cards.map(c=>c.cat)),'marathon'];
-  const lbl={all:'All',srs:'SRS',daily:'Daily',marathon:'Marathon'};
+  const cats=['all','srs','daily',...new Set(cards.map(c=>c.cat)),'marathon','learned'];
+  const lbl={all:'All',srs:'SRS',daily:'Daily',marathon:'Marathon',learned:`Изучено (${learned.size})`};
   document.getElementById('mode-row').innerHTML=cats.map(m=>`<button class="mode-btn${m===activeMode?' active':''}" onclick="setMode('${m}')">${lbl[m]||m}</button>`).join('');
 }
 function setMode(m){
@@ -387,13 +512,23 @@ function setMode(m){
 function renderLives(){for(let i=1;i<=3;i++)document.getElementById(`ld${i}`).classList.toggle('lost',i>mLives);}
 function buildQueue(){
   let f=cards;
-  if(activeMode==='daily')f=cards.filter(c=>c.daily);
+  if(activeMode==='learned'){f=cards.filter(c=>isLearned(c.id));}
+  else if(activeMode==='daily'){f=cards.filter(c=>c.daily&&!isLearned(c.id));if(!f.length)f=cards.filter(c=>c.daily);}
   else if(activeMode==='srs'){const today=todayStr();f=cards.filter(c=>{const s=srs[c.id];return!s||s.nextDate<=today;}).sort((a,b)=>(srs[a.id]?.nextDate||'0').localeCompare(srs[b.id]?.nextDate||'0'));queue=f;qIdx=0;return;}
-  else if(activeMode!=='all'&&activeMode!=='marathon')f=cards.filter(c=>c.cat===activeMode);
+  else if(activeMode!=='all'&&activeMode!=='marathon'){f=cards.filter(c=>c.cat===activeMode&&!isLearned(c.id));if(!f.length)f=cards.filter(c=>c.cat===activeMode);}
+  else{f=cards.filter(c=>!isLearned(c.id));if(!f.length)f=cards;}
   queue=[...f].sort((a,b)=>{const sa=stats[a.id]||{k:0,s:0},sb=stats[b.id]||{k:0,s:0};const ra=Math.floor((sa.k/(sa.k+sa.s+1))*5),rb=Math.floor((sb.k/(sb.k+sb.s+1))*5);return ra!==rb?ra-rb:Math.random()-.5;});qIdx=0;
 }
 function renderCard(){
-  if(!queue.length){document.getElementById('card-q').innerHTML=activeMode==='srs'?'All reviews complete for today.':'No cards in this mode.';['card-ans','card-cat','card-cat2'].forEach(id=>document.getElementById(id).innerHTML='');document.getElementById('prog-txt').textContent='0 / 0';document.getElementById('prog-fill').style.width='0%';document.getElementById('srs-chip').style.display='none';document.getElementById('card-source').style.display='none';return;}
+  if(!queue.length){
+    const msg=activeMode==='srs'?'All reviews complete for today.':activeMode==='learned'?'Нет изученных карточек.':'No cards in this mode.';
+    document.getElementById('card-q').innerHTML=msg;
+    ['card-ans','card-cat','card-cat2'].forEach(id=>document.getElementById(id).innerHTML='');
+    document.getElementById('prog-txt').textContent='0 / 0';document.getElementById('prog-fill').style.width='0%';
+    document.getElementById('srs-chip').style.display='none';document.getElementById('card-source').style.display='none';
+    const btn=document.getElementById('btn-learn');if(btn)btn.style.display='none';
+    return;
+  }
   const c=queue[qIdx%queue.length];isFlipped=false;document.getElementById('card').classList.remove('flipped','shake');
   const catCls=c.cat.toLowerCase().replace(/[^a-z]/g,'');
   ['card-cat','card-cat2'].forEach(id=>{const el=document.getElementById(id);el.textContent=c.cat;el.className=`cat-badge ${catCls}`;});
@@ -405,6 +540,7 @@ function renderCard(){
   const src=document.getElementById('card-source');if(c.wikiSource){src.style.display='';document.getElementById('card-source-link').textContent=c.wikiSource;}else src.style.display='none';
   document.getElementById('prog-txt').textContent=`${qIdx} / ${queue.length}`;
   document.getElementById('prog-fill').style.width=`${queue.length?(qIdx/queue.length)*100:0}%`;
+  renderLearnBtn();
 }
 function flipCard(){isFlipped=!isFlipped;document.getElementById('card').classList.toggle('flipped',isFlipped);}
 function openWikiSource(){const c=queue[qIdx%queue.length];if(c?.wikiSource){const a=wikiArticles.find(x=>x.title===c.wikiSource);if(a){showPage('wiki');loadWikiArticle(a);}}}
@@ -424,6 +560,8 @@ function answer(know){
   setTimeout(renderCard,know?180:520);
 }
 function stripHtml(h){const d=document.createElement('div');d.innerHTML=h;const t=d.textContent||'';return t.length>110?t.slice(0,110)+'…':t;}
+
+// BOSS
 function startBoss(){
   document.getElementById('boss-start').style.display='none';
   bQueue=[...cards].sort(()=>Math.random()-.5).slice(0,10);
@@ -441,7 +579,6 @@ function renderBossCard(){
   document.getElementById('bc').textContent=bC;document.getElementById('bw').textContent=bW;
   document.getElementById('boss-prog').style.width=`${(bIdx/10)*100}%`;
   document.getElementById('boss-prog-txt').textContent=`${bIdx} / 10`;
-  // Build 3 choices: 1 correct + 2 distractors from same cat, then other cats if needed
   const sameCat=cards.filter(x=>x.id!==c.id&&x.cat===c.cat).sort(()=>Math.random()-.5);
   const diff=cards.filter(x=>x.id!==c.id&&x.cat!==c.cat).sort(()=>Math.random()-.5);
   const distractors=[...sameCat,...diff].slice(0,2);
@@ -459,6 +596,8 @@ function bossChoose(btn){
 }
 function endBoss(){if(!bRunning)return;bRunning=false;clearInterval(bTimer);document.getElementById('boss-quiz').style.display='none';document.getElementById('boss-result').style.display='flex';const pct=Math.round((bC/10)*100);const g=pct>=90?'S':pct>=70?'A':pct>=50?'B':pct>=30?'C':'D';const msgs={S:'Идеально. Готов к интервью.',A:'Сильно. Есть небольшие пробелы.',B:'Хорошо. Повтори слабые темы.',C:'Неплохой старт. Продолжай.',D:'Учись дальше. Это нормально.'};document.getElementById('boss-grade').textContent=g;document.getElementById('boss-sub').innerHTML=`${bC}/10 правильно &nbsp;·&nbsp; ${60-bTime}s<br>${msgs[g]}`;gainXP(bC*5);if(pct>=90){launchConfetti();launchConfetti();}}
 function resetBoss(){document.getElementById('boss-result').style.display='none';document.getElementById('boss-quiz').style.display='flex';document.getElementById('boss-start').style.display='';document.getElementById('boss-timer').textContent='60s';document.getElementById('bc').textContent='0';document.getElementById('bw').textContent='0';document.getElementById('boss-prog').style.width='0%';document.getElementById('boss-prog-txt').textContent='0 / 10';document.getElementById('boss-q').textContent='Press Start to begin Boss Mode';document.getElementById('boss-choices').innerHTML='';}
+
+// WIKI
 async function loadWikiIndex(){
   const sb=document.getElementById('wiki-sidebar');
   try{const r=await fetch(rawUrl('wiki/index.json'),{cache:'no-cache'});if(!r.ok)throw 0;
@@ -469,7 +608,7 @@ async function loadWikiIndex(){
 }
 function buildWikiSidebar(){
   const cats=[...new Set(wikiArticles.map(a=>a.cat))];let html='<div class="wiki-sidebar-title">Wiki</div>';
-  cats.forEach(cat=>{html+=`<div class="wiki-nav-cat">${cat}</div>`;wikiArticles.filter(a=>a.cat===cat).forEach(a=>{html+=`<button class="wiki-nav-btn${currentWiki?.file===a.file?' active':''}" onclick="loadWikiArticle(wikiArticles.find(x=>x.file==='${a.file}'))">  ${a.title}</button>`;});});
+  cats.forEach(cat=>{html+=`<div class="wiki-nav-cat">${cat}</div>`;wikiArticles.filter(a=>a.cat===cat).forEach(a=>{html+=`<button class="wiki-nav-btn${currentWiki?.file===a.file?' active':''}" onclick="loadWikiArticle(wikiArticles.find(x=>x.file==='${a.file}'))">${a.title}</button>`;});});
   document.getElementById('wiki-sidebar').innerHTML=html;
 }
 function extractQuestions(body){const lines=body.split('\n');let inC=false,qs=[];for(const l of lines){if(/^## (cards|карточки)/i.test(l)){inC=true;continue;}if(inC&&l.startsWith('##')){inC=false;continue;}if(inC&&/^[-*] /.test(l))qs.push(l.replace(/^[-*] /,'').trim());}return qs;}
@@ -499,7 +638,7 @@ async function generateCards(file,title,cat){
   const art=wikiArticles.find(a=>a.file===file);if(!art)return;
   const qs=extractQuestions(art.text.replace(/^---[\s\S]*?---\n/,''));
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:`Create flashcards from this developer wiki article.\n\nTitle: "${title}"\nCategory: "${cat}"\n\nArticle:\n${art.text}\n\nQuestions:\n${qs.map((q,i)=>`${i+1}. ${q}`).join('\n')}\n\nFor each question write a concise answer (2-5 sentences) based on the article. Use code examples where helpful. Use simple markdown.\n\nRespond ONLY with valid JSON array, no backticks:\n[{"q":"question","a":"answer in markdown"},...]`}]})});
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:`Create flashcards from this developer wiki article.\n\nTitle: "${title}"\nCategory: "${cat}"\n\nArticle:\n${art.text}\n\nQuestions:\n${qs.map((q,i)=>`${i+1}. ${q}`).join('\n')}\n\nFor each question write a concise answer (2-5 sentences) based on the article. Use code examples where helpful. Use simple markdown.\n\nRespond ONLY with valid JSON array, no backticks:\n[{"q":"question","a":"answer in markdown"},...]`}]})}); 
     const data=await resp.json();const raw=data.content.map(b=>b.text||'').join('').replace(/\x60\x60\x60json|\x60\x60\x60/g,'').trim();
     const generated=JSON.parse(raw);let added=0;
     generated.forEach((item,i)=>{if(!cards.find(c=>c.q===item.q)){cards.push({id:`wiki-${file.replace('.md','')}-${i}-${Date.now()}`,cat,daily:false,wikiSource:title,q:item.q,a:mdToHtml(item.a)});added++;}});
@@ -509,32 +648,63 @@ async function generateCards(file,title,cat){
     if(added>0)showToast(`${added} new cards added`);
   }catch(e){status.textContent='Failed. Check API access.';status.className='gen-status err';btn.textContent=`Generate ${qs.length} cards with AI`;btn.disabled=false;}
 }
-function gainXP(n){const prev=getLv(xp);xp+=n;localStorage.setItem('dc_xp',xp);const next=getLv(xp);updateXPUI(true);showXPPop(`+${n} XP`);if(next.idx>prev.idx)showLevelUp(next);}
+
+// XP / LEVELS
+function gainXP(n){const prev=getLv(xp);xp+=n;localStorage.setItem(uk('xp'),xp);const next=getLv(xp);updateXPUI(true);showXPPop(`+${n} XP`);if(next.idx>prev.idx)showLevelUp(next);}
 function getLv(x){let idx=0;for(let i=LEVELS.length-1;i>=0;i--){if(x>=LEVELS[i].xp){idx=i;break;}}const c=LEVELS[idx],n=LEVELS[idx+1];const inL=x-c.xp,need=n?n.xp-c.xp:100;return{idx,name:c.name,lbl:c.lbl,pct:Math.min(100,Math.round((inL/need)*100))};}
 function updateXPUI(anim){const lv=getLv(xp);document.getElementById('lv-badge').textContent=lv.lbl;const f=document.getElementById('xp-fill');f.style.transition=anim?'width .5s':'none';f.style.width=lv.pct+'%';document.getElementById('streak-val').textContent=streak;}
 function showXPPop(msg){const el=document.getElementById('xp-pop');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1400);}
 function showLevelUp(lv){document.getElementById('lu-lv').textContent=lv.lbl;document.getElementById('lu-name').textContent=lv.name;document.getElementById('lu-overlay').classList.add('show');launchConfetti();launchConfetti();setTimeout(()=>document.getElementById('lu-overlay').classList.remove('show'),3200);}
-function checkStreak(){const today=new Date().toDateString(),last=localStorage.getItem('dc_last_day'),yest=new Date(Date.now()-86400000).toDateString();if(last===today)return;streak=(last===yest)?streak+1:1;localStorage.setItem('dc_streak',streak);localStorage.setItem('dc_last_day',today);}
+function checkStreak(){const today=new Date().toDateString(),last=localStorage.getItem(uk('last_day')),yest=new Date(Date.now()-86400000).toDateString();if(last===today)return;streak=(last===yest)?streak+1:1;localStorage.setItem(uk('streak'),streak);localStorage.setItem(uk('last_day'),today);}
+
+// STATS
 function renderStats(){
   let tk=0,ts=0;cards.forEach(c=>{const s=stats[c.id]||{k:0,s:0};tk+=s.k;ts+=s.s;});const lv=getLv(xp);
-  document.getElementById('stats-grid').innerHTML=[['Cards',cards.length,'var(--text)'],['Correct',tk,'var(--know)'],['Incorrect',ts,'var(--skip)'],['XP',xp,'var(--accent)'],['Level',lv.name,'var(--gold)'],['Streak',streak,'var(--text)']].map(([l,v,c])=>`<div class="stat-card"><div class="stat-lbl">${l}</div><div class="stat-val" style="color:${c}">${v}</div></div>`).join('');
+  document.getElementById('stats-grid').innerHTML=[
+    ['Карточек',cards.filter(c=>!isLearned(c.id)).length,'var(--text)'],
+    ['Изучено',learned.size,'var(--accent)'],
+    ['Верно',tk,'var(--know)'],
+    ['Неверно',ts,'var(--skip)'],
+    ['XP',xp,'var(--accent)'],
+    ['Уровень',lv.name,'var(--gold)'],
+    ['Серия',streak,'var(--text)']
+  ].map(([l,v,c])=>`<div class="stat-card"><div class="stat-lbl">${l}</div><div class="stat-val" style="color:${c}">${v}</div></div>`).join('');
   renderHeatmap();
   const cats=[...new Set(cards.map(c=>c.cat))];
   document.getElementById('cat-list').innerHTML=cats.map(cat=>{const cc=cards.filter(c=>c.cat===cat);const k=cc.filter(c=>{const s=stats[c.id]||{k:0,s:0};return s.k>s.s;}).length;const p=Math.round((k/cc.length)*100);return`<div class="cat-row"><div class="cat-name">${cat}</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${p}%"></div></div><div class="cat-pct">${p}%</div></div>`;}).join('');
   const today=todayStr();const up=cards.filter(c=>srs[c.id]&&srs[c.id].nextDate>today).sort((a,b)=>srs[a.id].nextDate.localeCompare(srs[b.id].nextDate)).slice(0,5);
   document.getElementById('srs-upcoming').innerHTML=up.length?up.map(c=>`<div class="srs-row"><span class="srs-q">${c.q.slice(0,55)}${c.q.length>55?'…':''}</span><span class="srs-date">${srs[c.id].nextDate}</span></div>`).join(''):`<div style="font-family:var(--mono);font-size:.7rem;color:var(--muted2);padding:.4rem 0">No upcoming reviews.</div>`;
+  updateProfileUI();
 }
 function renderHeatmap(){
   const wrap=document.getElementById('heatmap');wrap.innerHTML='';const today=new Date();
   for(let w=25;w>=0;w--){const col=document.createElement('div');col.className='hm-col';for(let d=0;d<7;d++){const dt=new Date(today);dt.setDate(dt.getDate()-w*7-d);const key=dt.toISOString().slice(0,10);const v=hmap[key]||0;const cell=document.createElement('div');cell.className='hm-cell';if(v>0)cell.setAttribute('data-v',v>=8?4:v>=4?3:v>=2?2:1);cell.title=`${key}: ${v}`;col.appendChild(cell);}wrap.appendChild(col);}
 }
+
+// CONFETTI
 const cv=document.getElementById('confetti-canvas'),cx=cv.getContext('2d');let parts=[],animId=null;
 function launchConfetti(){cv.width=innerWidth;cv.height=innerHeight;const colors=['#c8f53a','#2ecc71','#e8b84b','#4a9eff','#e74c3c','#e8e4dc'];for(let i=0;i<55;i++)parts.push({x:Math.random()*cv.width,y:-10,vx:(Math.random()-.5)*6,vy:Math.random()*4+2,size:Math.random()*6+3,color:colors[Math.floor(Math.random()*colors.length)],rot:Math.random()*360,rotV:(Math.random()-.5)*8,shape:Math.random()>.5?'r':'c',opacity:1,g:.12});if(!animId)animConf();}
 function animConf(){cx.clearRect(0,0,cv.width,cv.height);parts=parts.filter(p=>p.opacity>0);parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.rot+=p.rotV;if(p.y>cv.height*.65)p.opacity-=.04;cx.save();cx.globalAlpha=p.opacity;cx.translate(p.x,p.y);cx.rotate(p.rot*Math.PI/180);cx.fillStyle=p.color;if(p.shape==='r')cx.fillRect(-p.size/2,-p.size/4,p.size,p.size/2);else{cx.beginPath();cx.arc(0,0,p.size/2,0,Math.PI*2);cx.fill();}cx.restore();});if(parts.length){animId=requestAnimationFrame(animConf);}else{animId=null;cx.clearRect(0,0,cv.width,cv.height);}}
-function saveAll(){localStorage.setItem('dc_stats',JSON.stringify(stats));localStorage.setItem('dc_srs',JSON.stringify(srs));localStorage.setItem('dc_hmap',JSON.stringify(hmap));}
-function resetAll(){if(!confirm('Reset all progress?'))return;['dc_stats','dc_srs','dc_hmap','dc_xp','dc_streak','dc_last_day'].forEach(k=>localStorage.removeItem(k));stats={};srs={};hmap={};xp=0;streak=0;updateXPUI(false);renderStats();showToast('Progress reset.');}
+
+// STORAGE
+function saveAll(){
+  localStorage.setItem(uk('stats'),JSON.stringify(stats));
+  localStorage.setItem(uk('srs'),JSON.stringify(srs));
+  localStorage.setItem(uk('hmap'),JSON.stringify(hmap));
+  localStorage.setItem(uk('learned'),JSON.stringify([...learned]));
+}
+function resetAll(){
+  if(!confirm('Сбросить весь прогресс пользователя '+getUser()+'?'))return;
+  [uk('stats'),uk('srs'),uk('hmap'),uk('xp'),uk('streak'),uk('last_day'),uk('learned')].forEach(k=>localStorage.removeItem(k));
+  stats={};srs={};hmap={};xp=0;streak=0;learned=new Set();
+  updateXPUI(false);updateProfileUI();buildModeRow();buildQueue();renderStats();showToast('Прогресс сброшен.');
+}
 function saveRepo(){const v=document.getElementById('repo-input').value.trim();if(!v||!v.includes('/')){showToast('Format: username/repo');return;}localStorage.setItem('dc_repo',v);document.getElementById('current-repo').textContent=v;showToast('Saved. Reloading...');setTimeout(()=>{loadCards();loadWikiIndex();},600);}
+
+// NAVIGATION
 function showPage(n){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('nav button').forEach((b,i)=>b.classList.toggle('active',['study','boss','wiki','stats','news','help'][i]===n));document.getElementById(n+'-page').classList.add('active');if(n==='stats')renderStats();if(n==='wiki'&&!wikiArticles.length)loadWikiIndex();if(n==='news')loadNews();}
+
+// NEWS
 async function loadNews(){
   const list=document.getElementById('news-list');
   if(list.dataset.loaded==='1')return;
@@ -549,8 +719,13 @@ async function loadNews(){
     list.dataset.loaded='1';
   }catch{list.innerHTML='<div class="news-load">Не удалось загрузить. Проверь соединение.</div>';}
 }
+
+// TOAST / KEYBOARD
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();flipCard();}if(e.key==='ArrowRight')answer(true);if(e.key==='ArrowLeft')answer(false);});
+document.getElementById('login-input').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+// EMBEDDED FALLBACK
 const EMBEDDED=[
   {id:'closure',cat:'Frontend',daily:true,difficulty:'medium',q:'Что такое замыкание (closure)?',a:'<p>Функция, которая <strong>запоминает переменные из внешней области видимости</strong> даже после завершения внешней функции.</p><pre><code>function counter() {\n  let n = 0;\n  return () => ++n;\n}\nconst c = counter();\nc(); // 1\nc(); // 2</code></pre>'},
   {id:'event-loop',cat:'Frontend',daily:true,difficulty:'hard',q:'Что такое Event Loop?',a:'<p>Механизм, делающий JS асинхронным. Порядок: <strong>Call Stack → Microtasks</strong> (Promise.then) <strong>→ Macrotasks</strong> (setTimeout).</p>'},
