@@ -70,6 +70,29 @@ nav button:hover:not(.active){color:var(--text)}
 .card-ans p{margin:.35rem 0}.card-ans blockquote{border-left:2px solid var(--b2);padding-left:.6rem;color:var(--muted2);margin:.4rem 0}
 .card-ans h1,.card-ans h2,.card-ans h3{display:none}
 .card-source{margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--b);font-family:var(--mono);font-size:.6rem;color:var(--muted2)}
+.cat-badge{border-radius:2px;padding:2px 7px;font-size:.6rem;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.cat-badge.frontend{color:var(--accent);background:var(--ad);border:1px solid rgba(200,245,58,.25)}
+.cat-badge.backend{color:var(--blue);background:rgba(74,158,255,.06);border:1px solid rgba(74,158,255,.25)}
+.cat-badge.english{color:var(--gold);background:rgba(232,184,75,.06);border:1px solid rgba(232,184,75,.25)}
+.cat-badge.other{color:var(--muted2);background:var(--s2);border:1px solid var(--b)}
+.diff-badge{border-radius:2px;padding:1px 6px;font-size:.58rem;font-family:var(--mono)}
+.diff-easy{color:#2ecc71;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.2)}
+.diff-medium{color:var(--gold);background:rgba(232,184,75,.08);border:1px solid rgba(232,184,75,.2)}
+.diff-hard{color:var(--skip);background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2)}
+.boss-choices{display:flex;flex-direction:column;gap:.55rem;width:100%;max-width:560px}
+.boss-choice{background:var(--s1);border:1px solid var(--b2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:.78rem;padding:.75rem 1rem;cursor:pointer;text-align:left;transition:border-color .15s,background .15s;line-height:1.45}
+.boss-choice:hover:not(:disabled){border-color:var(--accent);background:var(--s2)}
+.boss-choice.correct{border-color:var(--know)!important;background:var(--kd)!important;color:var(--know)}
+.boss-choice.wrong{border-color:var(--skip)!important;background:var(--sd)!important;color:var(--skip)}
+.boss-choice:disabled{cursor:not-allowed}
+.news-list{display:flex;flex-direction:column;gap:.75rem;padding:2rem;max-width:760px;margin:0 auto;width:100%}
+.news-header{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);padding-bottom:.75rem;border-bottom:1px solid var(--b)}
+.news-item{background:var(--s1);border:1px solid var(--b);border-radius:var(--r);padding:1rem 1.25rem;transition:border-color .15s}
+.news-item:hover{border-color:var(--b2)}
+.news-title{font-size:.88rem;font-weight:600;margin-bottom:.4rem;line-height:1.4}
+.news-title a{color:var(--text);text-decoration:none}.news-title a:hover{color:var(--accent)}
+.news-meta{font-family:var(--mono);font-size:.62rem;color:var(--muted2);display:flex;gap:1rem;flex-wrap:wrap}
+.news-load{text-align:center;padding:3rem;font-family:var(--mono);font-size:.72rem;color:var(--muted2)}
 .card-source a{color:var(--accent);text-decoration:none;cursor:pointer}.card-source a:hover{text-decoration:underline}
 .prog-row{display:flex;align-items:center;gap:10px;width:100%;max-width:560px}
 .prog-wrap{flex:1;height:1px;background:var(--b);overflow:hidden}
@@ -200,6 +223,7 @@ nav button:hover:not(.active){color:var(--text)}
   <button onclick="showPage('boss')">Boss</button>
   <button onclick="showPage('wiki')">Wiki</button>
   <button onclick="showPage('stats')">Progress</button>
+  <button onclick="showPage('news')">News</button>
   <button onclick="showPage('help')">Setup</button>
 </nav>
 
@@ -210,12 +234,12 @@ nav button:hover:not(.active){color:var(--text)}
   <div class="card-wrap">
     <div class="card" id="card" onclick="flipCard()">
       <div class="card-face card-front">
-        <div class="card-meta"><span id="card-cat"></span><span class="srs-chip" id="srs-chip" style="display:none"></span></div>
+        <div class="card-meta"><span id="card-cat" class="cat-badge"></span><span id="card-diff" class="diff-badge" style="display:none"></span><span class="srs-chip" id="srs-chip" style="display:none"></span></div>
         <div class="card-q" id="card-q">Loading...</div>
         <div class="card-hint">click to reveal answer</div>
       </div>
       <div class="card-face card-back" id="card-back">
-        <div class="card-meta"><span id="card-cat2"></span></div>
+        <div class="card-meta"><span id="card-cat2" class="cat-badge"></span></div>
         <div class="card-ans" id="card-ans"></div>
         <div class="card-source" id="card-source" style="display:none">From wiki: <a onclick="openWikiSource()" id="card-source-link"></a></div>
       </div>
@@ -233,17 +257,16 @@ nav button:hover:not(.active){color:var(--text)}
   <div id="boss-quiz" style="display:flex;flex-direction:column;align-items:center;padding:2rem 1.5rem;gap:1.25rem;width:100%">
     <div class="boss-bar"><div class="boss-timer" id="boss-timer">60s</div><div class="boss-score-txt">correct <b id="bc">0</b> / wrong <b id="bw">0</b> / 10</div></div>
     <div class="card-wrap">
-      <div class="card" id="boss-card" onclick="bossFlip()">
-        <div class="card-face card-front"><div class="card-meta"><span id="boss-cat"></span></div><div class="card-q" id="boss-q">Press Start to begin Boss Mode</div><div class="card-hint">click to flip</div></div>
-        <div class="card-face card-back"><div class="card-meta"><span id="boss-cat2"></span></div><div class="card-ans" id="boss-ans"></div></div>
+      <div class="card" id="boss-card" style="cursor:default">
+        <div class="card-face card-front" style="position:relative;transform:none;backface-visibility:visible">
+          <div class="card-meta"><span id="boss-cat" class="cat-badge"></span></div>
+          <div class="card-q" id="boss-q">Press Start to begin Boss Mode</div>
+        </div>
+        <div class="card-face card-back" style="display:none"><div class="card-meta"></div><div id="boss-ans"></div></div>
       </div>
     </div>
+    <div class="boss-choices" id="boss-choices"></div>
     <div class="prog-row" style="max-width:560px;width:100%"><div class="prog-wrap"><div class="prog-fill" id="boss-prog" style="width:0%;background:var(--gold)"></div></div><div class="prog-txt" id="boss-prog-txt">0 / 10</div></div>
-    <div class="actions" style="max-width:560px;width:100%">
-      <button class="btn-skip" id="bskip" onclick="bossAns(false)" disabled>incorrect</button>
-      <button class="btn-flip" onclick="bossFlip()">flip</button>
-      <button class="btn-know" id="bknow" onclick="bossAns(true)" disabled>correct</button>
-    </div>
     <button class="btn-boss-start" id="boss-start" onclick="startBoss()">Start Boss Mode</button>
   </div>
   <div class="boss-result" id="boss-result" style="display:none">
@@ -254,6 +277,9 @@ nav button:hover:not(.active){color:var(--text)}
   </div>
 </div>
 
+<div id="news-page" class="page">
+  <div class="news-list" id="news-list"><div class="news-load">Loading...</div></div>
+</div>
 <div id="wiki-page" class="page">
   <div class="wiki-sidebar" id="wiki-sidebar"><div class="wiki-sidebar-title">Wiki</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted2)">Loading...</div></div>
   <div class="wiki-content" id="wiki-content"><div class="wiki-empty"><div style="font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2)">Select an article</div><p>Choose a topic from the sidebar.</p></div></div>
@@ -336,7 +362,7 @@ function parseFM(text){const fm={};const m=text.match(/^---\n([\s\S]*?)\n---/);i
 function parseMD(text,fn){
   const fm=parseFM(text);const body=text.replace(/^---[\s\S]*?---\n/,'');const lines=body.split('\n');let q='',aL=[],inA=false;
   for(const l of lines){if(l.startsWith('# ')&&!q){q=l.replace(/^# /,'').trim();}else if(l.startsWith('## ')&&l.toLowerCase().includes('ответ')){inA=true;}else if(inA){aL.push(l);}}
-  return{id:fm.id||fn.replace('.md',''),cat:fm.category||'Other',daily:fm.daily==='true',wikiSource:fm.wikiSource||null,q,a:mdToHtml(aL.join('\n').trim())};
+  return{id:fm.id||fn.replace('.md',''),cat:fm.category||'Other',daily:fm.daily==='true',difficulty:fm.difficulty||null,wikiSource:fm.wikiSource||null,q,a:mdToHtml(aL.join('\n').trim())};
 }
 function mdToHtml(md){
   let h=md.replace(/```(\w*)\n([\s\S]*?)```/g,(_,l,c)=>`<pre><code>${esc(c.trim())}</code></pre>`)
@@ -364,12 +390,14 @@ function buildQueue(){
   if(activeMode==='daily')f=cards.filter(c=>c.daily);
   else if(activeMode==='srs'){const today=todayStr();f=cards.filter(c=>{const s=srs[c.id];return!s||s.nextDate<=today;}).sort((a,b)=>(srs[a.id]?.nextDate||'0').localeCompare(srs[b.id]?.nextDate||'0'));queue=f;qIdx=0;return;}
   else if(activeMode!=='all'&&activeMode!=='marathon')f=cards.filter(c=>c.cat===activeMode);
-  queue=[...f].sort((a,b)=>{const sa=stats[a.id]||{k:0,s:0},sb=stats[b.id]||{k:0,s:0};return(sa.k/(sa.k+sa.s+1))-(sb.k/(sb.k+sb.s+1));});qIdx=0;
+  queue=[...f].sort((a,b)=>{const sa=stats[a.id]||{k:0,s:0},sb=stats[b.id]||{k:0,s:0};const ra=Math.floor((sa.k/(sa.k+sa.s+1))*5),rb=Math.floor((sb.k/(sb.k+sb.s+1))*5);return ra!==rb?ra-rb:Math.random()-.5;});qIdx=0;
 }
 function renderCard(){
   if(!queue.length){document.getElementById('card-q').innerHTML=activeMode==='srs'?'All reviews complete for today.':'No cards in this mode.';['card-ans','card-cat','card-cat2'].forEach(id=>document.getElementById(id).innerHTML='');document.getElementById('prog-txt').textContent='0 / 0';document.getElementById('prog-fill').style.width='0%';document.getElementById('srs-chip').style.display='none';document.getElementById('card-source').style.display='none';return;}
   const c=queue[qIdx%queue.length];isFlipped=false;document.getElementById('card').classList.remove('flipped','shake');
-  document.getElementById('card-cat').textContent=c.cat;document.getElementById('card-cat2').textContent=c.cat;
+  const catCls=c.cat.toLowerCase().replace(/[^a-z]/g,'');
+  ['card-cat','card-cat2'].forEach(id=>{const el=document.getElementById(id);el.textContent=c.cat;el.className=`cat-badge ${catCls}`;});
+  const diffEl=document.getElementById('card-diff');if(diffEl){if(c.difficulty){diffEl.textContent=c.difficulty;diffEl.className=`diff-badge diff-${c.difficulty}`;diffEl.style.display='';}else diffEl.style.display='none';}
   document.getElementById('card-q').textContent=c.q;document.getElementById('card-ans').innerHTML=c.a;
   document.getElementById('card-back').classList.remove('flash-ok','flash-err');
   const chip=document.getElementById('srs-chip'),sr=srs[c.id];
@@ -395,24 +423,42 @@ function answer(know){
   if(qIdx>=queue.length){if(mActive&&mLives>0){showToast('Marathon complete.');launchConfetti();launchConfetti();}else showToast('Round complete.');buildQueue();}
   setTimeout(renderCard,know?180:520);
 }
+function stripHtml(h){const d=document.createElement('div');d.innerHTML=h;const t=d.textContent||'';return t.length>110?t.slice(0,110)+'…':t;}
 function startBoss(){
-  document.getElementById('boss-start').style.display='none';bQueue=[...cards].sort(()=>Math.random()-.5).slice(0,10);
-  bIdx=0;bC=0;bW=0;bTime=60;bRunning=true;bFlipped=false;
-  document.getElementById('bskip').disabled=false;document.getElementById('bknow').disabled=false;renderBossCard();
+  document.getElementById('boss-start').style.display='none';
+  bQueue=[...cards].sort(()=>Math.random()-.5).slice(0,10);
+  bIdx=0;bC=0;bW=0;bTime=60;bRunning=true;
+  renderBossCard();
   bTimer=setInterval(()=>{bTime--;document.getElementById('boss-timer').textContent=bTime+'s';if(bTime<=0)endBoss();},1000);
 }
 function renderBossCard(){
-  if(bIdx>=bQueue.length){endBoss();return;}const c=bQueue[bIdx];bFlipped=false;
-  document.getElementById('boss-card').classList.remove('flipped','shake');
-  document.getElementById('boss-cat').textContent=c.cat;document.getElementById('boss-cat2').textContent=c.cat;
-  document.getElementById('boss-q').textContent=c.q;document.getElementById('boss-ans').innerHTML=c.a;
+  if(bIdx>=bQueue.length){endBoss();return;}
+  const c=bQueue[bIdx];
+  document.getElementById('boss-card').classList.remove('shake');
+  const catCls=c.cat.toLowerCase().replace(/[^a-z]/g,'');
+  const catEl=document.getElementById('boss-cat');catEl.textContent=c.cat;catEl.className=`cat-badge ${catCls}`;
+  document.getElementById('boss-q').textContent=c.q;
   document.getElementById('bc').textContent=bC;document.getElementById('bw').textContent=bW;
-  document.getElementById('boss-prog').style.width=`${(bIdx/10)*100}%`;document.getElementById('boss-prog-txt').textContent=`${bIdx} / 10`;
+  document.getElementById('boss-prog').style.width=`${(bIdx/10)*100}%`;
+  document.getElementById('boss-prog-txt').textContent=`${bIdx} / 10`;
+  // Build 3 choices: 1 correct + 2 distractors from same cat, then other cats if needed
+  const sameCat=cards.filter(x=>x.id!==c.id&&x.cat===c.cat).sort(()=>Math.random()-.5);
+  const diff=cards.filter(x=>x.id!==c.id&&x.cat!==c.cat).sort(()=>Math.random()-.5);
+  const distractors=[...sameCat,...diff].slice(0,2);
+  const choices=[c,...distractors].sort(()=>Math.random()-.5);
+  document.getElementById('boss-choices').innerHTML=choices.map(ch=>`<button class="boss-choice" data-correct="${ch.id===c.id}" onclick="bossChoose(this)">${stripHtml(ch.a)}</button>`).join('');
 }
-function bossFlip(){bFlipped=!bFlipped;document.getElementById('boss-card').classList.toggle('flipped',bFlipped);}
-function bossAns(know){if(!bRunning||bIdx>=bQueue.length)return;if(know){bC++;launchConfetti();}else{bW++;document.getElementById('boss-card').classList.add('shake');setTimeout(()=>document.getElementById('boss-card').classList.remove('shake'),420);}bIdx++;if(bIdx>=10)endBoss();else renderBossCard();}
-function endBoss(){if(!bRunning)return;bRunning=false;clearInterval(bTimer);document.getElementById('bskip').disabled=true;document.getElementById('bknow').disabled=true;document.getElementById('boss-quiz').style.display='none';document.getElementById('boss-result').style.display='flex';const pct=Math.round((bC/10)*100);const g=pct>=90?'S':pct>=70?'A':pct>=50?'B':pct>=30?'C':'D';const msgs={S:'Perfect. Interview-ready.',A:'Strong. Minor gaps remain.',B:'Good. Review weak areas.',C:'Decent start. Keep going.',D:'Keep studying. It takes time.'};document.getElementById('boss-grade').textContent=g;document.getElementById('boss-sub').innerHTML=`${bC}/10 correct &nbsp;·&nbsp; ${60-bTime}s used<br>${msgs[g]}`;gainXP(bC*5);if(pct>=90){launchConfetti();launchConfetti();}}
-function resetBoss(){document.getElementById('boss-result').style.display='none';document.getElementById('boss-quiz').style.display='flex';document.getElementById('boss-start').style.display='';document.getElementById('boss-timer').textContent='60s';document.getElementById('bc').textContent='0';document.getElementById('bw').textContent='0';document.getElementById('boss-prog').style.width='0%';document.getElementById('boss-prog-txt').textContent='0 / 10';document.getElementById('boss-q').textContent='Press Start to begin Boss Mode';document.getElementById('boss-ans').innerHTML='';}
+function bossChoose(btn){
+  if(!bRunning)return;
+  const correct=btn.dataset.correct==='true';
+  document.querySelectorAll('.boss-choice').forEach(b=>{b.disabled=true;if(b.dataset.correct==='true')b.classList.add('correct');});
+  if(!correct){btn.classList.add('wrong');document.getElementById('boss-card').classList.add('shake');setTimeout(()=>document.getElementById('boss-card').classList.remove('shake'),420);}
+  if(correct){bC++;gainXP(5);launchConfetti();}else{bW++;}
+  document.getElementById('bc').textContent=bC;document.getElementById('bw').textContent=bW;
+  setTimeout(()=>{bIdx++;if(bIdx>=10)endBoss();else renderBossCard();},900);
+}
+function endBoss(){if(!bRunning)return;bRunning=false;clearInterval(bTimer);document.getElementById('boss-quiz').style.display='none';document.getElementById('boss-result').style.display='flex';const pct=Math.round((bC/10)*100);const g=pct>=90?'S':pct>=70?'A':pct>=50?'B':pct>=30?'C':'D';const msgs={S:'Идеально. Готов к интервью.',A:'Сильно. Есть небольшие пробелы.',B:'Хорошо. Повтори слабые темы.',C:'Неплохой старт. Продолжай.',D:'Учись дальше. Это нормально.'};document.getElementById('boss-grade').textContent=g;document.getElementById('boss-sub').innerHTML=`${bC}/10 правильно &nbsp;·&nbsp; ${60-bTime}s<br>${msgs[g]}`;gainXP(bC*5);if(pct>=90){launchConfetti();launchConfetti();}}
+function resetBoss(){document.getElementById('boss-result').style.display='none';document.getElementById('boss-quiz').style.display='flex';document.getElementById('boss-start').style.display='';document.getElementById('boss-timer').textContent='60s';document.getElementById('bc').textContent='0';document.getElementById('bw').textContent='0';document.getElementById('boss-prog').style.width='0%';document.getElementById('boss-prog-txt').textContent='0 / 10';document.getElementById('boss-q').textContent='Press Start to begin Boss Mode';document.getElementById('boss-choices').innerHTML='';}
 async function loadWikiIndex(){
   const sb=document.getElementById('wiki-sidebar');
   try{const r=await fetch(rawUrl('wiki/index.json'),{cache:'no-cache'});if(!r.ok)throw 0;
@@ -488,22 +534,36 @@ function animConf(){cx.clearRect(0,0,cv.width,cv.height);parts=parts.filter(p=>p
 function saveAll(){localStorage.setItem('dc_stats',JSON.stringify(stats));localStorage.setItem('dc_srs',JSON.stringify(srs));localStorage.setItem('dc_hmap',JSON.stringify(hmap));}
 function resetAll(){if(!confirm('Reset all progress?'))return;['dc_stats','dc_srs','dc_hmap','dc_xp','dc_streak','dc_last_day'].forEach(k=>localStorage.removeItem(k));stats={};srs={};hmap={};xp=0;streak=0;updateXPUI(false);renderStats();showToast('Progress reset.');}
 function saveRepo(){const v=document.getElementById('repo-input').value.trim();if(!v||!v.includes('/')){showToast('Format: username/repo');return;}localStorage.setItem('dc_repo',v);document.getElementById('current-repo').textContent=v;showToast('Saved. Reloading...');setTimeout(()=>{loadCards();loadWikiIndex();},600);}
-function showPage(n){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('nav button').forEach((b,i)=>b.classList.toggle('active',['study','boss','wiki','stats','help'][i]===n));document.getElementById(n+'-page').classList.add('active');if(n==='stats')renderStats();if(n==='wiki'&&!wikiArticles.length)loadWikiIndex();}
+function showPage(n){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('nav button').forEach((b,i)=>b.classList.toggle('active',['study','boss','wiki','stats','news','help'][i]===n));document.getElementById(n+'-page').classList.add('active');if(n==='stats')renderStats();if(n==='wiki'&&!wikiArticles.length)loadWikiIndex();if(n==='news')loadNews();}
+async function loadNews(){
+  const list=document.getElementById('news-list');
+  if(list.dataset.loaded==='1')return;
+  list.innerHTML='<div class="news-load">Загружаем новости с Hacker News...</div>';
+  try{
+    const r=await fetch('https://hn.algolia.com/api/v1/search?tags=front_page,story&hitsPerPage=30');
+    const d=await r.json();
+    const devRx=/javascript|typescript|css|react|vue|svelte|node|python|rust|go\b|api|web|frontend|backend|sql|git|github|open.?source|programming|developer|software|linux|docker|kubernetes|llm|ai\b/i;
+    const items=d.hits.filter(h=>h.url&&devRx.test(h.title+' '+(h.story_text||''))).slice(0,10);
+    if(!items.length){list.innerHTML='<div class="news-load">Нет релевантных новостей. Попробуй позже.</div>';return;}
+    list.innerHTML=`<div class="news-header">Hacker News · Топ для разработчиков</div>`+items.map(h=>`<div class="news-item"><div class="news-title"><a href="${h.url}" target="_blank" rel="noopener">${h.title}</a></div><div class="news-meta"><span>▲ ${h.points}</span><span>💬 ${h.num_comments}</span><span>${h.author}</span><span>${new Date(h.created_at).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}</span></div></div>`).join('');
+    list.dataset.loaded='1';
+  }catch{list.innerHTML='<div class="news-load">Не удалось загрузить. Проверь соединение.</div>';}
+}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();flipCard();}if(e.key==='ArrowRight')answer(true);if(e.key==='ArrowLeft')answer(false);});
 const EMBEDDED=[
-  {id:'closure',cat:'Frontend',daily:true,q:'Что такое замыкание (closure)?',a:'<p>Функция, которая <strong>запоминает переменные из внешней области видимости</strong> даже после завершения внешней функции.</p><pre><code>function counter() {\n  let n = 0;\n  return () => ++n;\n}\nconst c = counter();\nc(); // 1\nc(); // 2</code></pre>'},
-  {id:'event-loop',cat:'Frontend',daily:true,q:'Что такое Event Loop?',a:'<p>Механизм, делающий JS асинхронным. Порядок: <strong>Call Stack → Microtasks</strong> (Promise.then) <strong>→ Macrotasks</strong> (setTimeout).</p>'},
-  {id:'display',cat:'Frontend',daily:false,q:'Чем отличается display: block, inline и inline-block?',a:'<ul><li><strong>block</strong> — вся ширина, новая строка</li><li><strong>inline</strong> — по содержимому, без width/height</li><li><strong>inline-block</strong> — как inline, но принимает width/height</li></ul>'},
-  {id:'eq',cat:'Frontend',daily:false,q:'В чём разница между == и === в JavaScript?',a:'<p><code>==</code> приводит типы: <code>"5" == 5</code> → true.<br><code>===</code> строгое сравнение: <code>"5" === 5</code> → false. Всегда используй <strong>===</strong>.</p>'},
-  {id:'useeffect',cat:'Frontend',daily:true,q:'Как работает массив зависимостей в useEffect?',a:'<pre><code>useEffect(() => {}, [])      // один раз при монтировании\nuseEffect(() => {}, [count]) // при изменении count\nuseEffect(() => {})          // после каждого рендера</code></pre>'},
-  {id:'rest',cat:'Backend',daily:true,q:'Что такое REST API?',a:'<ul><li><strong>Stateless</strong> — сервер не хранит состояние клиента</li><li>Ресурсы через URL: <code>/users</code>, <code>/posts/1</code></li><li>HTTP методы: GET POST PUT PATCH DELETE</li></ul>'},
-  {id:'http-codes',cat:'Backend',daily:false,q:'Что означают HTTP-коды 200, 201, 400, 401, 403, 404, 500?',a:'<ul><li><code>200</code> OK · <code>201</code> Created (создан)</li><li><code>400</code> Bad Request · <code>401</code> Unauthorized · <code>403</code> Forbidden</li><li><code>404</code> Not Found · <code>500</code> Internal Server Error</li></ul>'},
-  {id:'joins',cat:'Backend',daily:false,q:'Чем отличается INNER JOIN от LEFT JOIN?',a:'<p><strong>INNER JOIN</strong> — только строки, совпадающие в обеих таблицах.</p><p><strong>LEFT JOIN</strong> — все строки из левой + совпадения из правой (NULL если нет).</p>'},
-  {id:'middleware',cat:'Backend',daily:true,q:'Что такое middleware?',a:'<p>Функция между запросом и ответом.</p><pre><code>app.use((req, res, next) => {\n  console.log(req.method);\n  next();\n});</code></pre>'},
-  {id:'pr-review',cat:'English',daily:true,q:'Как попросить коллегу проверить твой код?',a:'<blockquote>Hey, could you review my PR when you have a moment? I\'d appreciate your feedback.</blockquote><ul><li><code>take a look</code> — посмотреть, проверить</li><li><code>when you have a moment</code> — когда будет время</li></ul>'},
-  {id:'tenses-en',cat:'English',daily:false,q:'"I work" vs "I am working" — в чём разница?',a:'<p><strong>I work</strong> — регулярное действие: <em>"I work at a startup."</em></p><p><strong>I am working</strong> — прямо сейчас: <em>"I am working on a bug fix."</em></p>'},
-  {id:'deploy-en',cat:'English',daily:true,q:'Что значит "deploy to production"?',a:'<p>Публикация кода на живой сервер, которым пользуются реальные пользователи.</p><ul><li><code>production</code> — боевое окружение</li><li><code>staging</code> — тестовое окружение перед релизом</li></ul>'},
+  {id:'closure',cat:'Frontend',daily:true,difficulty:'medium',q:'Что такое замыкание (closure)?',a:'<p>Функция, которая <strong>запоминает переменные из внешней области видимости</strong> даже после завершения внешней функции.</p><pre><code>function counter() {\n  let n = 0;\n  return () => ++n;\n}\nconst c = counter();\nc(); // 1\nc(); // 2</code></pre>'},
+  {id:'event-loop',cat:'Frontend',daily:true,difficulty:'hard',q:'Что такое Event Loop?',a:'<p>Механизм, делающий JS асинхронным. Порядок: <strong>Call Stack → Microtasks</strong> (Promise.then) <strong>→ Macrotasks</strong> (setTimeout).</p>'},
+  {id:'display',cat:'Frontend',daily:false,difficulty:'easy',q:'Чем отличается display: block, inline и inline-block?',a:'<ul><li><strong>block</strong> — вся ширина, новая строка</li><li><strong>inline</strong> — по содержимому, без width/height</li><li><strong>inline-block</strong> — как inline, но принимает width/height</li></ul>'},
+  {id:'eq',cat:'Frontend',daily:false,difficulty:'easy',q:'В чём разница между == и === в JavaScript?',a:'<p><code>==</code> приводит типы: <code>"5" == 5</code> → true.<br><code>===</code> строгое сравнение: <code>"5" === 5</code> → false. Всегда используй <strong>===</strong>.</p>'},
+  {id:'useeffect',cat:'Frontend',daily:true,difficulty:'medium',q:'Как работает массив зависимостей в useEffect?',a:'<pre><code>useEffect(() => {}, [])      // один раз при монтировании\nuseEffect(() => {}, [count]) // при изменении count\nuseEffect(() => {})          // после каждого рендера</code></pre>'},
+  {id:'rest',cat:'Backend',daily:true,difficulty:'easy',q:'Что такое REST API?',a:'<ul><li><strong>Stateless</strong> — сервер не хранит состояние клиента</li><li>Ресурсы через URL: <code>/users</code>, <code>/posts/1</code></li><li>HTTP методы: GET POST PUT PATCH DELETE</li></ul>'},
+  {id:'http-codes',cat:'Backend',daily:false,difficulty:'easy',q:'Что означают HTTP-коды 200, 201, 400, 401, 403, 404, 500?',a:'<ul><li><code>200</code> OK · <code>201</code> Created (создан)</li><li><code>400</code> Bad Request · <code>401</code> Unauthorized · <code>403</code> Forbidden</li><li><code>404</code> Not Found · <code>500</code> Internal Server Error</li></ul>'},
+  {id:'joins',cat:'Backend',daily:false,difficulty:'medium',q:'Чем отличается INNER JOIN от LEFT JOIN?',a:'<p><strong>INNER JOIN</strong> — только строки, совпадающие в обеих таблицах.</p><p><strong>LEFT JOIN</strong> — все строки из левой + совпадения из правой (NULL если нет).</p>'},
+  {id:'middleware',cat:'Backend',daily:true,difficulty:'medium',q:'Что такое middleware?',a:'<p>Функция между запросом и ответом.</p><pre><code>app.use((req, res, next) => {\n  console.log(req.method);\n  next();\n});</code></pre>'},
+  {id:'pr-review',cat:'English',daily:true,difficulty:'easy',q:'Как попросить коллегу проверить твой код?',a:'<blockquote>Hey, could you review my PR when you have a moment? I\'d appreciate your feedback.</blockquote><ul><li><code>take a look</code> — посмотреть, проверить</li><li><code>when you have a moment</code> — когда будет время</li></ul>'},
+  {id:'tenses-en',cat:'English',daily:false,difficulty:'easy',q:'"I work" vs "I am working" — в чём разница?',a:'<p><strong>I work</strong> — регулярное действие: <em>"I work at a startup."</em></p><p><strong>I am working</strong> — прямо сейчас: <em>"I am working on a bug fix."</em></p>'},
+  {id:'deploy-en',cat:'English',daily:true,difficulty:'easy',q:'Что значит "deploy to production"?',a:'<p>Публикация кода на живой сервер, которым пользуются реальные пользователи.</p><ul><li><code>production</code> — боевое окружение</li><li><code>staging</code> — тестовое окружение перед релизом</li></ul>'},
 ];
 init();
 </script>
