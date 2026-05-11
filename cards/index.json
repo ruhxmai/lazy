@@ -3,5 +3,10 @@
   "js-event-loop.md",
   "rest-api.md",
   "sql-joins.md",
-  "english-pr-review.md"
+  "english-pr-review.md",
+  "css-flexbox.md",
+  "js-promises.md",
+  "react-useeffect.md",
+  "http-status-codes.md",
+  "english-git-commit.md"
 ]
