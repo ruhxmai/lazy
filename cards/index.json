@@ -13,5 +13,10 @@
   "css-box-model.md",
   "react-usestate.md",
   "sql-groupby.md",
-  "english-tech-vocab.md"
+  "english-tech-vocab.md",
+  "js-hoisting.md",
+  "react-props.md",
+  "css-position.md",
+  "sql-indexes.md",
+  "english-standup.md"
 ]
