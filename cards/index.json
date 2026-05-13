@@ -13,5 +13,10 @@
   "css-box-model.md",
   "react-usestate.md",
   "sql-groupby.md",
-  "english-tech-vocab.md"
+  "english-tech-vocab.md",
+  "js-async-await.md",
+  "css-grid.md",
+  "react-props.md",
+  "http-methods.md",
+  "english-error-messages.md"
 ]
