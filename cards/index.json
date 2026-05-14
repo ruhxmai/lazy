@@ -18,5 +18,10 @@
   "css-grid.md",
   "react-props.md",
   "http-methods.md",
-  "english-error-messages.md"
+  "english-error-messages.md",
+  "js-scope.md",
+  "js-destructuring.md",
+  "react-usecallback.md",
+  "sql-indexes.md",
+  "english-standup.md"
 ]
