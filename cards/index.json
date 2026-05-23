@@ -18,5 +18,10 @@
   "css-grid.md",
   "react-props.md",
   "http-methods.md",
-  "english-error-messages.md"
+  "english-error-messages.md",
+  "js-destructuring.md",
+  "react-context.md",
+  "sql-transactions.md",
+  "http-cors.md",
+  "english-standup.md"
 ]
