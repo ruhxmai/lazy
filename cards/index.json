@@ -18,5 +18,10 @@
   "css-grid.md",
   "react-props.md",
   "http-methods.md",
-  "english-error-messages.md"
+  "english-error-messages.md",
+  "js-var-let-const.md",
+  "react-usememo.md",
+  "sql-where-having.md",
+  "css-position.md",
+  "english-reading-docs.md"
 ]
