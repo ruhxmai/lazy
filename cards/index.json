@@ -23,5 +23,10 @@
   "react-usecallback.md",
   "sql-indexes.md",
   "http-headers.md",
-  "english-standup.md"
+  "english-standup.md",
+  "js-prototype.md",
+  "react-usememo.md",
+  "sql-transactions.md",
+  "css-positioning.md",
+  "english-debugging.md"
 ]
