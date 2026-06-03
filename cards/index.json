@@ -28,5 +28,10 @@
   "react-useref.md",
   "css-positioning.md",
   "sql-transactions.md",
-  "english-debugging.md"
+  "english-debugging.md",
+  "js-this.md",
+  "react-context.md",
+  "css-media-queries.md",
+  "sql-subqueries.md",
+  "http-cors.md"
 ]
