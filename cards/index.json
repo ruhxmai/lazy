@@ -33,5 +33,10 @@
   "react-context.md",
   "css-media-queries.md",
   "sql-subqueries.md",
-  "http-cors.md"
+  "http-cors.md",
+  "js-hoisting.md",
+  "react-usememo.md",
+  "sql-window-functions.md",
+  "http-caching.md",
+  "english-tech-interview.md"
 ]
