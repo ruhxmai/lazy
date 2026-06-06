@@ -33,5 +33,10 @@
   "react-context.md",
   "css-media-queries.md",
   "sql-subqueries.md",
-  "http-cors.md"
+  "http-cors.md",
+  "js-prototype.md",
+  "react-memo.md",
+  "sql-where-having.md",
+  "http-caching.md",
+  "english-meeting-phrases.md"
 ]
