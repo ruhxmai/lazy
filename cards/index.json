@@ -38,5 +38,10 @@
   "react-usememo.md",
   "sql-window-functions.md",
   "http-caching.md",
-  "english-documentation.md"
+  "english-documentation.md",
+  "js-spread-rest.md",
+  "css-variables.md",
+  "react-custom-hooks.md",
+  "sql-normalization.md",
+  "english-code-review.md"
 ]
