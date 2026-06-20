@@ -38,5 +38,10 @@
   "react-usememo.md",
   "sql-window-functions.md",
   "http-caching.md",
-  "english-documentation.md"
+  "english-documentation.md",
+  "js-hoisting.md",
+  "js-map-set.md",
+  "react-keys.md",
+  "sql-normalization.md",
+  "http-auth.md"
 ]
