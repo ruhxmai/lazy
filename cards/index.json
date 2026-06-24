@@ -43,5 +43,10 @@
   "js-modules.md",
   "react-keys.md",
   "sql-constraints.md",
-  "css-variables.md"
+  "css-variables.md",
+  "js-spread-rest.md",
+  "js-typeof.md",
+  "react-custom-hook.md",
+  "sql-select.md",
+  "english-code-review.md"
 ]
