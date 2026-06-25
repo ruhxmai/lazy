@@ -43,5 +43,10 @@
   "js-modules.md",
   "react-keys.md",
   "sql-constraints.md",
-  "css-variables.md"
+  "css-variables.md",
+  "js-error-handling.md",
+  "js-optional-chaining.md",
+  "react-usereducer.md",
+  "sql-cte.md",
+  "english-code-review.md"
 ]
