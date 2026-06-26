@@ -43,5 +43,10 @@
   "js-modules.md",
   "react-keys.md",
   "sql-constraints.md",
-  "css-variables.md"
+  "css-variables.md",
+  "js-spread-rest.md",
+  "react-custom-hooks.md",
+  "sql-normalization.md",
+  "rest-pagination.md",
+  "english-asking-help.md"
 ]
