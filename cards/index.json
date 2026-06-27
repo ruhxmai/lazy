@@ -48,5 +48,10 @@
   "react-custom-hooks.md",
   "sql-normalization.md",
   "rest-pagination.md",
-  "english-asking-help.md"
+  "english-asking-help.md",
+  "js-type-coercion.md",
+  "js-localstorage.md",
+  "css-animations.md",
+  "react-memo.md",
+  "english-naming-conventions.md"
 ]
