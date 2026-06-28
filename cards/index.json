@@ -48,5 +48,10 @@
   "react-custom-hooks.md",
   "sql-normalization.md",
   "rest-pagination.md",
-  "english-asking-help.md"
+  "english-asking-help.md",
+  "js-optional-chaining.md",
+  "css-animations.md",
+  "react-lifecycle.md",
+  "sql-aggregate-functions.md",
+  "english-code-review.md"
 ]
