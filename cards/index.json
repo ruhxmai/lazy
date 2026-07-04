@@ -48,5 +48,10 @@
   "react-custom-hooks.md",
   "sql-normalization.md",
   "rest-pagination.md",
-  "english-asking-help.md"
+  "english-asking-help.md",
+  "js-equality.md",
+  "css-specificity.md",
+  "react-controlled-components.md",
+  "sql-keys.md",
+  "english-interview.md"
 ]
