@@ -53,5 +53,10 @@
   "css-specificity.md",
   "react-controlled-components.md",
   "sql-keys.md",
-  "english-interview.md"
+  "english-interview.md",
+  "js-event-delegation.md",
+  "css-animations.md",
+  "react-usereducer.md",
+  "rest-idempotency.md",
+  "english-explaining-decisions.md"
 ]
