@@ -58,5 +58,10 @@
   "css-animations.md",
   "react-usereducer.md",
   "rest-idempotency.md",
-  "english-explaining-decisions.md"
+  "english-explaining-decisions.md",
+  "js-debounce-throttle.md",
+  "css-units.md",
+  "react-memo.md",
+  "sql-null.md",
+  "english-writing-emails.md"
 ]
