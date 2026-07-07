@@ -63,5 +63,10 @@
   "css-units.md",
   "react-memo.md",
   "sql-null.md",
-  "english-writing-emails.md"
+  "english-writing-emails.md",
+  "js-optional-chaining.md",
+  "css-pseudo-classes.md",
+  "react-lifting-state-up.md",
+  "sql-aggregate-functions.md",
+  "english-phrasal-verbs.md"
 ]
