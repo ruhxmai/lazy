@@ -68,5 +68,10 @@
   "css-pseudo-classes.md",
   "react-lifting-state-up.md",
   "sql-aggregate-functions.md",
-  "english-phrasal-verbs.md"
+  "english-phrasal-verbs.md",
+  "js-var-let-const.md",
+  "css-stacking-context.md",
+  "react-error-boundaries.md",
+  "sql-cte.md",
+  "english-false-friends.md"
 ]
