@@ -73,5 +73,10 @@
   "css-stacking-context.md",
   "react-error-boundaries.md",
   "sql-cte.md",
-  "english-false-friends.md"
+  "english-false-friends.md",
+  "js-map-set.md",
+  "react-fragments.md",
+  "css-grid-vs-flexbox.md",
+  "rest-versioning.md",
+  "http-authentication.md"
 ]
