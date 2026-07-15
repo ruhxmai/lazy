@@ -78,5 +78,10 @@
   "css-display-values.md",
   "react-fragment.md",
   "sql-n-plus-one.md",
-  "english-acronyms.md"
+  "english-acronyms.md",
+  "js-generators.md",
+  "css-bem.md",
+  "react-lazy-suspense.md",
+  "sql-injection.md",
+  "english-writing-tickets.md"
 ]
