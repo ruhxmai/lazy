@@ -83,5 +83,10 @@
   "css-bem.md",
   "react-lazy-suspense.md",
   "sql-injection.md",
-  "english-writing-tickets.md"
+  "english-writing-tickets.md",
+  "js-callbacks.md",
+  "css-pseudo-elements.md",
+  "react-portals.md",
+  "sql-having-vs-where.md",
+  "english-meeting-vocab.md"
 ]
