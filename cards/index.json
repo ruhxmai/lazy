@@ -83,5 +83,10 @@
   "css-bem.md",
   "react-lazy-suspense.md",
   "sql-injection.md",
-  "english-writing-tickets.md"
+  "english-writing-tickets.md",
+  "js-array-sort-mutates.md",
+  "css-transitions-vs-animations.md",
+  "react-forwardref.md",
+  "sql-union-vs-union-all.md",
+  "english-numbers-dates.md"
 ]
