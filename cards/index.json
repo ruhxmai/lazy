@@ -83,5 +83,11 @@
   "css-bem.md",
   "react-lazy-suspense.md",
   "sql-injection.md",
-  "english-writing-tickets.md"
+  "english-writing-tickets.md",
+  "js-call-apply-bind.md",
+  "css-transitions.md",
+  "react-conditional-rendering.md",
+  "http-authentication.md",
+  "sql-views.md",
+  "english-estimates.md"
 ]
