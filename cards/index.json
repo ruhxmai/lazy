@@ -83,5 +83,10 @@
   "css-bem.md",
   "react-lazy-suspense.md",
   "sql-injection.md",
-  "english-writing-tickets.md"
+  "english-writing-tickets.md",
+  "js-nullish-coalescing.md",
+  "css-box-sizing.md",
+  "react-prop-drilling.md",
+  "http-redirects.md",
+  "english-small-talk.md"
 ]
