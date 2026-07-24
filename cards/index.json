@@ -83,5 +83,10 @@
   "css-bem.md",
   "react-lazy-suspense.md",
   "sql-injection.md",
-  "english-writing-tickets.md"
+  "english-writing-tickets.md",
+  "js-null-vs-undefined.md",
+  "css-pseudo-elements.md",
+  "react-virtual-dom.md",
+  "http-cookies-sessions.md",
+  "english-meetings-vocab.md"
 ]
