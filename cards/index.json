@@ -88,5 +88,10 @@
   "css-pseudo-elements.md",
   "react-virtual-dom.md",
   "http-cookies-sessions.md",
-  "english-meetings-vocab.md"
+  "english-meetings-vocab.md",
+  "js-truthy-falsy.md",
+  "css-transitions.md",
+  "react-portals.md",
+  "sql-having-vs-where.md",
+  "english-present-perfect.md"
 ]
