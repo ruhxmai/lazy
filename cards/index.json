@@ -88,5 +88,10 @@
   "css-pseudo-elements.md",
   "react-virtual-dom.md",
   "http-cookies-sessions.md",
-  "english-meetings-vocab.md"
+  "english-meetings-vocab.md",
+  "js-currying.md",
+  "css-transform.md",
+  "react-portals.md",
+  "http-websockets.md",
+  "sql-having-vs-where.md"
 ]
