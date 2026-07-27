@@ -88,5 +88,10 @@
   "css-pseudo-elements.md",
   "react-virtual-dom.md",
   "http-cookies-sessions.md",
-  "english-meetings-vocab.md"
+  "english-meetings-vocab.md",
+  "js-typeof-vs-instanceof.md",
+  "css-transform.md",
+  "sql-self-join.md",
+  "http-1-vs-http-2.md",
+  "english-async-communication.md"
 ]
