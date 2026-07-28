@@ -88,5 +88,10 @@
   "css-pseudo-elements.md",
   "react-virtual-dom.md",
   "http-cookies-sessions.md",
-  "english-meetings-vocab.md"
+  "english-meetings-vocab.md",
+  "js-try-catch-finally.md",
+  "react-uselayouteffect.md",
+  "sql-exists-vs-in.md",
+  "rest-vs-graphql.md",
+  "english-disagreeing-politely.md"
 ]
