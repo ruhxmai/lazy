@@ -88,5 +88,10 @@
   "css-pseudo-elements.md",
   "react-virtual-dom.md",
   "http-cookies-sessions.md",
-  "english-meetings-vocab.md"
+  "english-meetings-vocab.md",
+  "http-jwt.md",
+  "js-json-methods.md",
+  "js-try-catch.md",
+  "css-selectors.md",
+  "react-form-validation.md"
 ]
