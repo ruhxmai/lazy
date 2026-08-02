@@ -93,5 +93,10 @@
   "css-transform.md",
   "react-conditional-rendering.md",
   "sql-having-vs-where.md",
-  "http-redirects.md"
+  "http-redirects.md",
+  "js-typeof-vs-instanceof.md",
+  "react-usememo-vs-usecallback.md",
+  "http-put-vs-patch.md",
+  "sql-acid.md",
+  "english-articles-a-an-the.md"
 ]
