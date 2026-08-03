@@ -93,5 +93,10 @@
   "css-transform.md",
   "react-conditional-rendering.md",
   "sql-having-vs-where.md",
-  "http-redirects.md"
+  "http-redirects.md",
+  "js-iife.md",
+  "css-container-queries.md",
+  "react-strict-mode.md",
+  "sql-triggers.md",
+  "english-modal-verbs.md"
 ]
