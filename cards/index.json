@@ -29,7 +29,6 @@
   "css-positioning.md",
   "sql-transactions.md",
   "english-debugging.md",
-  "js-this.md",
   "react-context.md",
   "css-media-queries.md",
   "sql-subqueries.md",
@@ -93,5 +92,10 @@
   "css-transform.md",
   "react-conditional-rendering.md",
   "sql-having-vs-where.md",
-  "http-redirects.md"
+  "http-redirects.md",
+  "js-call-apply-bind.md",
+  "css-box-sizing.md",
+  "react-forwardref.md",
+  "sql-union-vs-union-all.md",
+  "english-estimates-vocab.md"
 ]
