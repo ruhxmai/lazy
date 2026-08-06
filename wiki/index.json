@@ -19,5 +19,6 @@
   "js-generators.md",
   "react-virtual-dom.md",
   "react-useeffect.md",
-  "js-this.md"
+  "js-this.md",
+  "sql-acid.md"
 ]
