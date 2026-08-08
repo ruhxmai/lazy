@@ -97,5 +97,10 @@
   "css-box-sizing.md",
   "react-forwardref.md",
   "sql-union-vs-union-all.md",
-  "english-estimates-vocab.md"
+  "english-estimates-vocab.md",
+  "js-json-methods.md",
+  "css-combinators.md",
+  "react-prop-drilling.md",
+  "http-jwt-vs-session.md",
+  "english-giving-feedback.md"
 ]
